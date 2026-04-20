@@ -12,7 +12,9 @@
     {
       "step": 1,
       "name": "domain-layer",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-20T17:06:12+0900",
+      "summary": "JPA 엔티티 4종(User, Prompt, Purchase, RefreshToken) + 열거형 2종(PromptType, TargetRole) 생성 완료"
     },
     {
       "step": 2,
