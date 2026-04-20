@@ -1,0 +1,34 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:marketplace;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate.format_sql: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope: email,profile
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiry: 3600000
+  refresh-token-expiry: 1209600000
+
+cors:
+  allowed-origins: http://localhost:3000,http://localhost:5173
+
+frontend:
+  url: http://localhost:8080
+
+logging:
+  level:
+    com.marketplace: DEBUG
+    org.springframework.security: INFO

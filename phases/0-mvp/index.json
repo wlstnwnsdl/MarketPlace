@@ -1,0 +1,54 @@
+{
+  "project": "MarketPlace",
+  "phase": "0-mvp",
+  "steps": [
+    {
+      "step": 0,
+      "name": "project-setup",
+      "status": "completed",
+      "started_at": "2026-04-20T16:32:10+0900",
+      "summary": "Gradle 빌드 설정 완료 (settings.gradle, build.gradle, gradlew), Spring Boot 스켈레톤(MarketplaceApplication.java, application.yml), React/Vite 프론트엔드 초기화 완료 (frontend/package.json, vite.config.ts, tsconfig.json, tailwind, App.tsx 등)"
+    },
+    {
+      "step": 1,
+      "name": "domain-layer",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "auth-layer",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "repository-layer",
+      "status": "pending"
+    },
+    {
+      "step": 4,
+      "name": "prompt-service",
+      "status": "pending"
+    },
+    {
+      "step": 5,
+      "name": "purchase-service",
+      "status": "pending"
+    },
+    {
+      "step": 6,
+      "name": "api-layer",
+      "status": "pending"
+    },
+    {
+      "step": 7,
+      "name": "frontend-foundation",
+      "status": "pending"
+    },
+    {
+      "step": 8,
+      "name": "frontend-pages",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-04-20T16:32:10+0900"
+}
