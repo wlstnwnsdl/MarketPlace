@@ -54,7 +54,7 @@
       "name": "api-layer",
       "status": "completed",
       "started_at": "2026-04-20T17:19:01+0900",
-      "completed_at": "2026-04-20T17:35:00+0900",
+      "completed_at": "2026-04-20T17:31:29+0900",
       "summary": "AuthController, PromptController, PurchaseController, GlobalExceptionHandler, SpaController 구현 완료, PromptControllerTest 통과"
     },
     {
