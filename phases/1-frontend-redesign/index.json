@@ -31,7 +31,8 @@
       "name": "detail-page",
       "status": "completed",
       "started_at": "2026-04-21T08:41:49+0900",
-      "summary": "PromptDetailPage 재설계 완료 — 라이트모드, 좌우 패널, 터미널버튼(get/buy/download), 구매패널 sticky, Header 컴포넌트 분리"
+      "summary": "PromptDetailPage 재설계 완료 — 라이트모드, 좌우 패널, 터미널버튼(get/buy/download), 구매패널 sticky, Header 컴포넌트 분리",
+      "completed_at": "2026-04-21T08:43:39+0900"
     },
     {
       "step": 4,
