@@ -1,24 +1,52 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { listPrompts } from '../api/prompts'
+import { getMyPurchases } from '../api/purchases'
 import FilterBar from '../components/FilterBar'
 import PromptCard from '../components/PromptCard'
-import type { PromptSummary, PromptType, TargetRole } from '../types'
+import type { PageResponse, PromptSummary, PromptType, TargetRole } from '../types'
+
+function StatCard({ label, value }: { label: string; value: number | null }) {
+  return (
+    <div className="text-right">
+      <div className="text-2xl font-bold text-zinc-900 leading-none">
+        {value === null ? '—' : value}
+      </div>
+      <div className="text-xs font-medium text-zinc-400 uppercase tracking-wider mt-0.5">{label}</div>
+    </div>
+  )
+}
+
+function SkeletonCard() {
+  return (
+    <div className="animate-pulse bg-zinc-100 rounded-xl h-48 border border-zinc-200" />
+  )
+}
 
 export default function HomePage() {
   const navigate = useNavigate()
   const isLoggedIn = !!localStorage.getItem('accessToken')
 
-  const [type, setType] = useState<PromptType | undefined>()
-  const [targetRole, setTargetRole] = useState<TargetRole | undefined>()
+  const [type, setType] = useState<PromptType | undefined>(undefined)
+  const [targetRole, setTargetRole] = useState<TargetRole | undefined>(undefined)
   const [keyword, setKeyword] = useState('')
   const [debouncedKeyword, setDebouncedKeyword] = useState('')
   const [page, setPage] = useState(0)
-  const [prompts, setPrompts] = useState<PromptSummary[]>([])
-  const [totalPages, setTotalPages] = useState(0)
-  const [loading, setLoading] = useState(false)
+  const [data, setData] = useState<PageResponse<PromptSummary> | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [purchasedCount, setPurchasedCount] = useState<number | null>(null)
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      getMyPurchases()
+        .then((ids) => setPurchasedCount(ids.length))
+        .catch(() => setPurchasedCount(0))
+    } else {
+      setPurchasedCount(0)
+    }
+  }, [isLoggedIn])
 
   const handleKeywordChange = (value: string) => {
     setKeyword(value)
@@ -28,23 +56,6 @@ export default function HomePage() {
       setPage(0)
     }, 300)
   }
-
-  const fetchPrompts = useCallback(async () => {
-    setLoading(true)
-    try {
-      const result = await listPrompts({ type, targetRole, keyword: debouncedKeyword || undefined, page, size: 9 })
-      setPrompts(result.content)
-      setTotalPages(result.totalPages)
-    } catch {
-      setPrompts([])
-    } finally {
-      setLoading(false)
-    }
-  }, [type, targetRole, debouncedKeyword, page])
-
-  useEffect(() => {
-    fetchPrompts()
-  }, [fetchPrompts])
 
   const handleTypeChange = (t: PromptType | undefined) => {
     setType(t)
@@ -56,82 +67,148 @@ export default function HomePage() {
     setPage(0)
   }
 
+  const handleResetFilters = () => {
+    setType(undefined)
+    setTargetRole(undefined)
+    setKeyword('')
+    setDebouncedKeyword('')
+    setPage(0)
+  }
+
+  useEffect(() => {
+    setLoading(true)
+    listPrompts({ type, targetRole, keyword: debouncedKeyword || undefined, page, size: 8 })
+      .then((result) => setData(result))
+      .catch(() => setData(null))
+      .finally(() => setLoading(false))
+  }, [type, targetRole, debouncedKeyword, page])
+
+  const prompts = data?.content ?? []
+  const totalPages = data?.totalPages ?? 0
+  const totalCount = data?.totalElements ?? null
+
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
-      <div className="max-w-6xl mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold text-white">MarketPlace</h1>
-          <div className="flex items-center gap-4">
-            {isLoggedIn ? (
-              <>
-                <Link to="/upload" className="rounded-lg bg-amber-500 text-black font-medium hover:bg-amber-400 px-4 py-2 text-sm transition-colors">
-                  프롬프트 등록
-                </Link>
-                <Link to="/mypage" className="text-neutral-500 hover:text-neutral-300 transition-colors text-sm">
+    <div className="min-h-screen bg-surface">
+      {/* Header */}
+      <header className="bg-white border-b border-zinc-200 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-zinc-900 rounded-lg flex items-center justify-center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <path d="M16 10a4 4 0 0 1-8 0" />
+              </svg>
+            </div>
+            <span className="font-semibold text-zinc-900 text-lg">Marketplace</span>
+          </div>
+
+          <div className="flex items-center gap-8">
+            <StatCard label="Available" value={totalCount} />
+            <StatCard label="Purchased" value={purchasedCount} />
+            {isLoggedIn && (
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => navigate('/mypage')}
+                  className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors"
+                >
                   마이페이지
-                </Link>
-              </>
-            ) : (
-              <Link to="/login" className="text-neutral-500 hover:text-neutral-300 transition-colors text-sm">
+                </button>
+              </div>
+            )}
+            {!isLoggedIn && (
+              <button
+                onClick={() => navigate('/login')}
+                className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors"
+              >
                 로그인
-              </Link>
+              </button>
             )}
           </div>
         </div>
+      </header>
 
-        <div className="mb-4">
-          <input
-            type="text"
-            placeholder="프롬프트 검색..."
-            value={keyword}
-            onChange={(e) => handleKeywordChange(e.target.value)}
-            className="w-full rounded-lg bg-neutral-900 border border-neutral-800 px-4 py-2.5 text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:border-neutral-600 transition-colors"
-          />
-        </div>
-
-        <div className="flex gap-6">
-          <FilterBar
-            type={type}
-            targetRole={targetRole}
-            onTypeChange={handleTypeChange}
-            onRoleChange={handleRoleChange}
-          />
-
-          <div className="flex-1">
-            {loading ? (
-              <p className="text-neutral-500 text-sm">로딩 중...</p>
-            ) : prompts.length === 0 ? (
-              <p className="text-neutral-500 text-sm">프롬프트가 없습니다.</p>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {prompts.map((p) => (
-                  <PromptCard key={p.id} prompt={p} onClick={() => navigate(`/prompts/${p.id}`)} />
-                ))}
-              </div>
-            )}
-
-            {totalPages > 1 && (
-              <div className="flex items-center gap-3 mt-6">
-                <button
-                  disabled={page === 0}
-                  onClick={() => setPage((p) => p - 1)}
-                  className="text-neutral-500 hover:text-neutral-300 transition-colors text-sm disabled:opacity-30 disabled:cursor-not-allowed"
-                >
-                  이전
-                </button>
-                <span className="text-neutral-500 text-sm">{page + 1} / {totalPages}</span>
-                <button
-                  disabled={page >= totalPages - 1}
-                  onClick={() => setPage((p) => p + 1)}
-                  className="text-neutral-500 hover:text-neutral-300 transition-colors text-sm disabled:opacity-30 disabled:cursor-not-allowed"
-                >
-                  다음
-                </button>
-              </div>
-            )}
+      <main className="max-w-7xl mx-auto px-6 py-6 space-y-4">
+        {/* Search + 등록 */}
+        <div className="flex items-center gap-3">
+          <div className="relative flex-1">
+            <svg
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+              width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="text"
+              placeholder="프롬프트 제목, 태그, 설명으로 검색..."
+              value={keyword}
+              onChange={(e) => handleKeywordChange(e.target.value)}
+              className="w-full bg-white border border-zinc-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-400 shadow-sm transition-colors"
+            />
           </div>
+          {isLoggedIn && (
+            <button
+              onClick={() => navigate('/upload')}
+              className="shrink-0 px-4 py-2.5 bg-zinc-900 text-white text-sm font-medium rounded-xl hover:bg-zinc-700 transition-colors"
+            >
+              + 등록하기
+            </button>
+          )}
         </div>
-      </div>
+
+        {/* Filters */}
+        <FilterBar
+          type={type}
+          targetRole={targetRole}
+          onTypeChange={handleTypeChange}
+          onRoleChange={handleRoleChange}
+        />
+
+        {/* Grid */}
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
+          </div>
+        ) : prompts.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-3">
+            <p className="text-zinc-500 text-sm">검색 결과가 없습니다</p>
+            <button
+              onClick={handleResetFilters}
+              className="text-sm text-zinc-900 border border-zinc-200 rounded-lg px-4 py-2 hover:bg-zinc-50 transition-colors"
+            >
+              필터 초기화
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {prompts.map((p) => (
+              <PromptCard key={p.id} prompt={p} onClick={() => navigate(`/prompts/${p.id}`)} />
+            ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-8">
+            <button
+              disabled={page === 0}
+              onClick={() => setPage((p) => p - 1)}
+              className="px-4 py-2 text-sm border border-zinc-200 rounded-lg hover:bg-zinc-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              ← 이전
+            </button>
+            <span className="text-sm text-zinc-500 px-2">{page + 1} / {totalPages}</span>
+            <button
+              disabled={page >= totalPages - 1}
+              onClick={() => setPage((p) => p + 1)}
+              className="px-4 py-2 text-sm border border-zinc-200 rounded-lg hover:bg-zinc-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              다음 →
+            </button>
+          </div>
+        )}
+      </main>
     </div>
   )
 }

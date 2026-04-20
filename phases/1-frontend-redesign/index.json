@@ -21,7 +21,10 @@
     {
       "step": 2,
       "name": "home-page",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-21T08:40:11+0900",
+      "summary": "HomePage 재설계 완료 — 헤더(로고+통계), 검색(debounce 300ms), 수평필터탭, xl:4열그리드, 스켈레톤 8개, 빈결과+리셋버튼, 페이지네이션",
+      "completed_at": "2026-04-21T09:10:00+0900"
     },
     {
       "step": 3,
