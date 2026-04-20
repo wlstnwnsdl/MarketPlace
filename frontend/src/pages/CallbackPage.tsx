@@ -20,8 +20,8 @@ export default function CallbackPage() {
   }, [navigate])
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-      <p className="text-neutral-400">인증 중...</p>
+    <div className="min-h-screen bg-surface flex items-center justify-center">
+      <p className="text-zinc-500">인증 중...</p>
     </div>
   )
 }

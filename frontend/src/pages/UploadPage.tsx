@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createPrompt } from '../api/prompts'
+import Header from '../components/Header'
 import type { PromptType, TargetRole } from '../types'
 
-const MAX_BYTES = 50 * 1024
+const MAX_BYTES = 51200
 
 const TYPE_OPTIONS: { label: string; value: PromptType }[] = [
   { label: 'CLAUDE.md', value: 'CLAUDE_MD' },
@@ -34,6 +35,7 @@ export default function UploadPage() {
 
   const contentBytes = new TextEncoder().encode(content).length
   const isOverLimit = contentBytes > MAX_BYTES
+  const usagePercent = Math.min((contentBytes / MAX_BYTES) * 100, 100)
 
   const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' || e.key === ',') {
@@ -52,7 +54,7 @@ export default function UploadPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (isOverLimit) return
+    if (isOverLimit || !title || !content || !type) return
     setSubmitting(true)
     setError(null)
     try {
@@ -65,132 +67,183 @@ export default function UploadPage() {
     }
   }
 
+  const inputClass = 'w-full border border-zinc-200 rounded-xl px-4 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-400 bg-white transition-colors'
+  const labelClass = 'text-sm font-medium text-zinc-700 mb-1.5 block'
+
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
-      <div className="max-w-2xl mx-auto px-4 py-6">
-        <h1 className="text-2xl font-semibold text-white mb-6">프롬프트 등록</h1>
+    <div className="min-h-screen bg-surface">
+      <Header />
+      <div className="max-w-3xl mx-auto px-6 py-8">
+        <h1 className="text-xl font-semibold text-zinc-900 mb-6">프롬프트 등록</h1>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1.5 block">제목</label>
-            <input
-              type="text"
-              required
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full rounded-lg bg-neutral-900 border border-neutral-800 px-4 py-2.5 text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:border-neutral-600 transition-colors"
-              placeholder="프롬프트 제목"
-            />
-          </div>
-
-          <div>
-            <label className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1.5 block">설명</label>
-            <textarea
-              required
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-              className="w-full rounded-lg bg-neutral-900 border border-neutral-800 px-4 py-2.5 text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:border-neutral-600 transition-colors resize-none"
-              placeholder="프롬프트에 대한 설명"
-            />
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-medium text-neutral-500 uppercase tracking-wider">내용</label>
-              <span className={`text-xs font-mono ${isOverLimit ? 'text-red-500' : 'text-neutral-500'}`}>
-                {contentBytes.toLocaleString()} / {MAX_BYTES.toLocaleString()} bytes
-              </span>
-            </div>
-            <textarea
-              required
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows={12}
-              className="w-full rounded-lg bg-[#0d0d0d] border border-neutral-800 px-4 py-2.5 font-mono text-sm text-neutral-300 placeholder:text-neutral-600 focus:outline-none focus:border-neutral-600 transition-colors resize-none"
-              placeholder="프롬프트 내용을 입력하세요..."
-            />
-            {isOverLimit && (
-              <p className="mt-1 text-xs text-red-500">50KB 한도를 초과했습니다.</p>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
+        <div className="mp-card p-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* 제목 */}
             <div>
-              <label className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1.5 block">타입</label>
-              <select
-                value={type}
-                onChange={(e) => setType(e.target.value as PromptType)}
-                className="w-full rounded-lg bg-neutral-900 border border-neutral-800 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-neutral-600 transition-colors"
-              >
-                {TYPE_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
+              <label className={labelClass}>제목 *</label>
+              <input
+                type="text"
+                required
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className={inputClass}
+                placeholder="프롬프트 제목"
+              />
             </div>
 
-            <div>
-              <label className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1.5 block">대상 역할</label>
-              <select
-                value={targetRole ?? ''}
-                onChange={(e) => setTargetRole((e.target.value as TargetRole) || undefined)}
-                className="w-full rounded-lg bg-neutral-900 border border-neutral-800 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-neutral-600 transition-colors"
-              >
-                <option value="">전체</option>
-                {ROLE_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1.5 block">가격 (0 = 무료)</label>
-            <input
-              type="number"
-              min={0}
-              value={price}
-              onChange={(e) => setPrice(Number(e.target.value))}
-              className="w-full rounded-lg bg-neutral-900 border border-neutral-800 px-4 py-2.5 text-sm text-white focus:outline-none focus:border-neutral-600 transition-colors"
-            />
-          </div>
-
-          <div>
-            <label className="text-xs font-medium text-neutral-500 uppercase tracking-wider mb-1.5 block">태그</label>
-            <input
-              type="text"
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={handleTagKeyDown}
-              className="w-full rounded-lg bg-neutral-900 border border-neutral-800 px-4 py-2.5 text-sm text-white placeholder:text-neutral-600 focus:outline-none focus:border-neutral-600 transition-colors"
-              placeholder="Enter 또는 쉼표로 태그 추가"
-            />
-            {tags.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-2">
-                {tags.map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => removeTag(tag)}
-                    className="rounded-full bg-neutral-800 text-neutral-400 px-2 py-0.5 text-xs hover:bg-neutral-700 transition-colors"
-                  >
-                    {tag} ×
-                  </button>
-                ))}
+            {/* 타입 / 역할 / 가격 */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className={labelClass}>타입 *</label>
+                <div className="flex flex-wrap gap-1">
+                  {TYPE_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setType(opt.value)}
+                      className={type === opt.value ? 'mp-tab-active text-xs px-2.5 py-1' : 'mp-tab-inactive text-xs px-2.5 py-1'}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-            )}
-          </div>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+              <div>
+                <label className={labelClass}>역할</label>
+                <div className="flex flex-wrap gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setTargetRole(undefined)}
+                    className={targetRole === undefined ? 'mp-tab-active text-xs px-2.5 py-1' : 'mp-tab-inactive text-xs px-2.5 py-1'}
+                  >
+                    전체
+                  </button>
+                  {ROLE_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setTargetRole(opt.value)}
+                      className={targetRole === opt.value ? 'mp-tab-active text-xs px-2.5 py-1' : 'mp-tab-inactive text-xs px-2.5 py-1'}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-          <button
-            type="submit"
-            disabled={submitting || isOverLimit}
-            className="w-full rounded-lg bg-amber-500 text-black font-medium hover:bg-amber-400 px-4 py-2.5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {submitting ? '등록 중...' : '등록하기'}
-          </button>
-        </form>
+              <div>
+                <label className={labelClass}>가격 (0 = 무료)</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-zinc-500">₩</span>
+                  <input
+                    type="number"
+                    min={0}
+                    value={price}
+                    onChange={(e) => setPrice(Number(e.target.value))}
+                    className={inputClass + ' pl-8'}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 설명 */}
+            <div>
+              <label className={labelClass}>설명</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={3}
+                className={inputClass + ' resize-none'}
+                placeholder="프롬프트에 대한 설명"
+              />
+            </div>
+
+            {/* 내용 */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-sm font-medium text-zinc-700">프롬프트 내용 * (50KB 이하)</label>
+                <span className={`text-xs font-mono ${isOverLimit ? 'text-red-500' : 'text-zinc-400'}`}>
+                  {contentBytes.toLocaleString()} bytes
+                </span>
+              </div>
+              <textarea
+                required
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                rows={16}
+                className={inputClass + ' font-mono resize-none h-64'}
+                placeholder="프롬프트 내용을 입력하세요..."
+              />
+              <div className="mt-2">
+                <div className="w-full bg-zinc-100 rounded-full h-1.5">
+                  <div
+                    className={`h-1.5 rounded-full transition-all ${usagePercent > 90 ? 'bg-red-500' : 'bg-zinc-900'}`}
+                    style={{ width: `${usagePercent}%` }}
+                  />
+                </div>
+                <span className="text-xs text-zinc-400 mt-1 block">
+                  {contentBytes.toLocaleString()} / {MAX_BYTES.toLocaleString()} bytes · {Math.round(usagePercent)}% 사용
+                </span>
+              </div>
+              {isOverLimit && (
+                <p className="mt-1 text-xs text-red-500">50KB 한도를 초과했습니다.</p>
+              )}
+            </div>
+
+            {/* 태그 */}
+            <div>
+              <label className={labelClass}>태그 (엔터로 추가)</label>
+              <input
+                type="text"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={handleTagKeyDown}
+                className={inputClass}
+                placeholder="Enter 또는 쉼표로 태그 추가"
+              />
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="bg-zinc-100 text-zinc-600 text-xs px-2 py-0.5 rounded-full flex items-center gap-1"
+                    >
+                      {tag}
+                      <button
+                        type="button"
+                        onClick={() => removeTag(tag)}
+                        className="text-zinc-400 hover:text-zinc-600 ml-1 leading-none"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+
+            {/* 버튼 */}
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors px-4 py-2"
+              >
+                취소
+              </button>
+              <button
+                type="submit"
+                disabled={!title || !content || isOverLimit || !type || submitting}
+                className="mp-btn-terminal px-8 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {submitting ? '등록 중...' : '> marketplace publish'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   )
