@@ -44,7 +44,10 @@
     {
       "step": 5,
       "name": "purchase-service",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-20T17:16:07+0900",
+      "completed_at": "2026-04-20T17:30:00+0900",
+      "summary": "PurchaseService + PurchaseEventHandler(downloadCount 비동기 증가) 구현 완료, PurchaseServiceTest 통과"
     },
     {
       "step": 6,
