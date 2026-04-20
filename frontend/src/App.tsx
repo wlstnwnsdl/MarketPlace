@@ -1,13 +1,11 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import PrivateRoute from './components/PrivateRoute'
-
-function HomePage() { return <div>HomePage</div> }
-function PromptDetailPage() { return <div>PromptDetailPage</div> }
-function UploadPage() { return <div>UploadPage</div> }
-function PromptFormPage() { return <div>PromptFormPage</div> }
-function MyPage() { return <div>MyPage</div> }
-function LoginPage() { return <div>LoginPage</div> }
-function CallbackPage() { return <div>CallbackPage</div> }
+import CallbackPage from './pages/CallbackPage'
+import HomePage from './pages/HomePage'
+import LoginPage from './pages/LoginPage'
+import MyPage from './pages/MyPage'
+import PromptDetailPage from './pages/PromptDetailPage'
+import UploadPage from './pages/UploadPage'
 
 export default function App() {
   return (
@@ -27,7 +25,7 @@ export default function App() {
           path="/edit/:id"
           element={
             <PrivateRoute>
-              <PromptFormPage />
+              <UploadPage />
             </PrivateRoute>
           }
         />
