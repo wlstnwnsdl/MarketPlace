@@ -28,7 +28,10 @@
     {
       "step": 3,
       "name": "repository-layer",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-20T17:11:15+0900",
+      "completed_at": "2026-04-20T17:13:30+0900",
+      "summary": "4개 JPA 리포지토리(UserRepository, PromptRepository, PurchaseRepository, RefreshTokenRepository) + PromptRepositoryTest 구현 완료"
     },
     {
       "step": 4,
