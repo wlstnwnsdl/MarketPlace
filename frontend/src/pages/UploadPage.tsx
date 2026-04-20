@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createPrompt } from '../api/prompts'
-import TagBadge from '../components/TagBadge'
 import type { PromptType, TargetRole } from '../types'
 
 const MAX_BYTES = 50 * 1024
