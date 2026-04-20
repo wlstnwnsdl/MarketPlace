@@ -68,7 +68,10 @@
     {
       "step": 8,
       "name": "frontend-pages",
-      "status": "pending"
+      "status": "error",
+      "started_at": "2026-04-20T17:33:03+0900",
+      "error_message": "[3회 시도 후 실패] Step did not update status",
+      "failed_at": "2026-04-20T17:37:09+0900"
     }
   ],
   "created_at": "2026-04-20T16:32:10+0900"
