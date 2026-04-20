@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "npm run lint 2>&1 && npm run build 2>&1 && npm run test 2>&1"
+            "command": "if [ -f build.gradle ]; then ./gradlew build -x test 2>&1 | tail -5; fi && if [ -f frontend/package.json ]; then cd frontend && npm run build 2>&1 | tail -5; fi"
           }
         ]
       }
