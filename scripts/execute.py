@@ -8,6 +8,7 @@ Usage:
 
 import argparse
 import contextlib
+import io
 import json
 import os
 import subprocess
@@ -18,6 +19,12 @@ import types
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Optional
+
+# Windows에서 stdout/stderr를 UTF-8로 강제 설정
+if sys.stdout and hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+if sys.stderr and hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -108,7 +115,7 @@ class StepExecutor:
 
     def _run_git(self, *args) -> subprocess.CompletedProcess:
         cmd = ["git"] + list(args)
-        return subprocess.run(cmd, cwd=self._root, capture_output=True, text=True)
+        return subprocess.run(cmd, cwd=self._root, capture_output=True, text=True, encoding='utf-8', errors='replace')
 
     def _checkout_branch(self):
         branch = f"feat-{self._phase_name}"
@@ -238,6 +245,7 @@ class StepExecutor:
         result = subprocess.run(
             ["claude", "-p", "--dangerously-skip-permissions", "--output-format", "json", prompt],
             cwd=self._root, capture_output=True, text=True, timeout=1800,
+            encoding='utf-8', errors='replace',
         )
 
         if result.returncode != 0:
@@ -251,7 +259,7 @@ class StepExecutor:
             "stdout": result.stdout, "stderr": result.stderr,
         }
         out_path = self._phase_dir / f"step{step_num}-output.json"
-        with open(out_path, "w") as f:
+        with open(out_path, "w", encoding='utf-8') as f:
             json.dump(output, f, indent=2, ensure_ascii=False)
 
         return output
