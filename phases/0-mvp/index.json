@@ -22,7 +22,7 @@
       "name": "auth-layer",
       "status": "completed",
       "started_at": "2026-04-20T17:08:38+0900",
-      "completed_at": "2026-04-20T17:30:00+0900",
+      "completed_at": "2026-04-20T17:11:15+0900",
       "summary": "JWT(JwtProvider, JwtFilter) + OAuth2(OAuth2UserService, OAuth2SuccessHandler) + SecurityConfig 구현 완료, JwtProviderTest 통과"
     },
     {
