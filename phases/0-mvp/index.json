@@ -60,7 +60,10 @@
     {
       "step": 7,
       "name": "frontend-foundation",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-20T17:31:30+0900",
+      "completed_at": "2026-04-20T18:00:00+0900",
+      "summary": "TypeScript 타입 정의, Axios 클라이언트(JWT 인터셉터+401 재발급), API 함수(prompts.ts, purchases.ts), React Router 라우팅 + PrivateRoute 구현 완료"
     },
     {
       "step": 8,
