@@ -36,7 +36,10 @@
     {
       "step": 4,
       "name": "prompt-service",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-20T17:13:29+0900",
+      "summary": "PromptService 구현 완료 (콘텐츠 접근 제어, previewContent 자동 생성, 50KB 제한), PromptNotFoundException/UnauthorizedException 예외 클래스, PromptServiceTest 5개 케이스 통과",
+      "completed_at": "2026-04-20T17:16:05+0900"
     },
     {
       "step": 5,
