@@ -14,12 +14,16 @@
       "name": "domain-layer",
       "status": "completed",
       "started_at": "2026-04-20T17:06:12+0900",
-      "summary": "JPA 엔티티 4종(User, Prompt, Purchase, RefreshToken) + 열거형 2종(PromptType, TargetRole) 생성 완료"
+      "summary": "JPA 엔티티 4종(User, Prompt, Purchase, RefreshToken) + 열거형 2종(PromptType, TargetRole) 생성 완료",
+      "completed_at": "2026-04-20T17:07:26+0900"
     },
     {
       "step": 2,
       "name": "auth-layer",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-20T17:08:38+0900",
+      "completed_at": "2026-04-20T17:30:00+0900",
+      "summary": "JWT(JwtProvider, JwtFilter) + OAuth2(OAuth2UserService, OAuth2SuccessHandler) + SecurityConfig 구현 완료, JwtProviderTest 통과"
     },
     {
       "step": 3,
