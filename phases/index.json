@@ -7,7 +7,8 @@
     },
     {
       "dir": "1-frontend-redesign",
-      "status": "pending"
+      "status": "completed",
+      "completed_at": "2026-04-21T08:45:45+0900"
     }
   ]
 }
