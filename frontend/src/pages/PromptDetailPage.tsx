@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { downloadPrompt, getPrompt } from '../api/prompts'
+import client from '../api/client'
+import { getPrompt } from '../api/prompts'
 import { purchasePrompt } from '../api/purchases'
+import Header from '../components/Header'
 import PromptPreview from '../components/PromptPreview'
 import TagBadge from '../components/TagBadge'
-import type { PromptDetail, PromptType } from '../types'
+import type { PromptDetail, PromptType, TargetRole } from '../types'
 
 const TYPE_LABEL: Record<PromptType, string> = {
   CLAUDE_MD: 'CLAUDE.md',
@@ -14,12 +16,63 @@ const TYPE_LABEL: Record<PromptType, string> = {
   BUNDLE: 'Bundle',
 }
 
-const TYPE_BADGE: Record<PromptType, string> = {
-  CLAUDE_MD: 'bg-amber-900/20 text-amber-400 border border-amber-900',
-  AGENT: 'bg-blue-900/20 text-blue-400 border border-blue-900',
-  SKILL: 'bg-green-900/20 text-green-400 border border-green-900',
-  SETTINGS: 'bg-neutral-800 text-neutral-400 border border-neutral-700',
-  BUNDLE: 'bg-purple-900/20 text-purple-400 border border-purple-900',
+const ROLE_LABEL: Record<TargetRole, string> = {
+  DEVELOPER: '개발자',
+  PLANNER: '기획자',
+  DESIGNER: '디자이너',
+}
+
+interface TypeConfig {
+  bg: string
+  icon: JSX.Element
+}
+
+const TYPE_CONFIG: Record<PromptType, TypeConfig> = {
+  CLAUDE_MD: {
+    bg: 'bg-amber-50',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+      </svg>
+    ),
+  },
+  AGENT: {
+    bg: 'bg-blue-50',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="8" r="4" />
+        <path d="M20 21a8 8 0 1 0-16 0" />
+      </svg>
+    ),
+  },
+  SKILL: {
+    bg: 'bg-green-50',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="16 18 22 12 16 6" />
+        <polyline points="8 6 2 12 8 18" />
+      </svg>
+    ),
+  },
+  SETTINGS: {
+    bg: 'bg-zinc-100',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#71717a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+      </svg>
+    ),
+  },
+  BUNDLE: {
+    bg: 'bg-purple-50',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+        <path d="M16 3H8l-2 4h12z" />
+      </svg>
+    ),
+  },
 }
 
 function getCurrentUserId(): number | null {
@@ -42,6 +95,7 @@ export default function PromptDetailPage() {
   const [downloading, setDownloading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const isLoggedIn = !!localStorage.getItem('accessToken')
   const currentUserId = getCurrentUserId()
 
   const fetchPrompt = async () => {
@@ -62,12 +116,9 @@ export default function PromptDetailPage() {
   }, [id])
 
   const handlePurchase = async () => {
-    if (!currentUserId) {
-      navigate('/login')
-      return
-    }
     if (!id) return
     setPurchasing(true)
+    setError(null)
     try {
       await purchasePrompt(Number(id))
       await fetchPrompt()
@@ -79,10 +130,17 @@ export default function PromptDetailPage() {
   }
 
   const handleDownload = async () => {
-    if (!id) return
+    if (!id || !prompt) return
     setDownloading(true)
+    setError(null)
     try {
-      await downloadPrompt(Number(id))
+      const { data } = await client.get<Blob>(`/prompts/${id}/download`, { responseType: 'blob' })
+      const url = URL.createObjectURL(data)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${prompt.title.replace(/\s+/g, '-')}.md`
+      a.click()
+      URL.revokeObjectURL(url)
     } catch {
       setError('다운로드에 실패했습니다.')
     } finally {
@@ -92,100 +150,152 @@ export default function PromptDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <p className="text-neutral-500">로딩 중...</p>
+      <div className="min-h-screen bg-surface">
+        <Header />
+        <main className="max-w-7xl mx-auto px-6 py-6">
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-zinc-200 rounded w-24" />
+            <div className="h-8 bg-zinc-200 rounded w-1/2" />
+            <div className="flex gap-8 mt-6">
+              <div className="flex-1 space-y-3">
+                <div className="h-4 bg-zinc-200 rounded" />
+                <div className="h-4 bg-zinc-200 rounded w-4/5" />
+                <div className="h-40 bg-zinc-200 rounded" />
+              </div>
+              <div className="w-80 h-48 bg-zinc-200 rounded-xl" />
+            </div>
+          </div>
+        </main>
       </div>
     )
   }
 
-  if (error || !prompt) {
+  if (error && !prompt) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <p className="text-red-500">{error ?? '프롬프트를 찾을 수 없습니다.'}</p>
+      <div className="min-h-screen bg-surface">
+        <Header />
+        <main className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-center">
+          <p className="text-red-500 text-sm">{error ?? '프롬프트를 찾을 수 없습니다.'}</p>
+        </main>
       </div>
     )
   }
 
-  const isSeller = currentUserId !== null && prompt.sellerId === currentUserId
+  if (!prompt) return null
+
+  const typeConfig = TYPE_CONFIG[prompt.type]
+  const isOwner = currentUserId !== null && prompt.sellerId === currentUserId
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
-      <div className="max-w-6xl mx-auto px-4 py-6">
+    <div className="min-h-screen bg-surface">
+      <Header />
+
+      <main className="max-w-7xl mx-auto px-6 py-6">
+        {/* 뒤로가기 */}
         <button
           onClick={() => navigate(-1)}
-          className="text-neutral-500 hover:text-neutral-300 transition-colors text-sm mb-6"
+          className="flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-900 mb-6 transition-colors"
         >
           ← 목록으로
         </button>
 
-        <div className="flex gap-8">
-          <div className="flex-1 space-y-4">
-            <div className="flex items-center gap-2">
-              <span className={`rounded px-2 py-0.5 text-xs font-medium ${TYPE_BADGE[prompt.type]}`}>
-                {TYPE_LABEL[prompt.type]}
-              </span>
+        {/* 프롬프트 헤더 */}
+        <div className="flex items-start justify-between mb-6">
+          <div className="flex items-start gap-4">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${typeConfig.bg}`}>
+              {typeConfig.icon}
             </div>
-            <h1 className="text-2xl font-semibold text-white">{prompt.title}</h1>
-            <p className="text-neutral-300">{prompt.description}</p>
-
-            {prompt.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1">
-                {prompt.tags.map((tag) => (
-                  <TagBadge key={tag} tag={tag} />
-                ))}
-              </div>
-            )}
-
-            <div className="text-xs text-neutral-500">
-              판매자 ID: {prompt.sellerId} · {new Date(prompt.createdAt).toLocaleDateString('ko-KR')}
+            <div>
+              <h1 className="text-2xl font-semibold text-zinc-900">{prompt.title}</h1>
+              <p className="text-sm text-zinc-400 mt-1">
+                {TYPE_LABEL[prompt.type]}
+                {prompt.targetRole && ` · ${ROLE_LABEL[prompt.targetRole]}`}
+                {` · ${prompt.downloadCount}회 다운로드`}
+              </p>
+              {prompt.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {prompt.tags.map(tag => <TagBadge key={tag} tag={tag} />)}
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="w-80 shrink-0 space-y-4">
-            <div className="rounded-lg bg-[#141414] border border-neutral-800 p-4 space-y-4">
-              <div className="text-lg font-semibold text-amber-500">
-                {prompt.price === 0 ? (
-                  <span className="text-green-500">무료</span>
-                ) : (
-                  `₩${prompt.price.toLocaleString()}`
-                )}
+          <span className={prompt.price === 0 ? 'mp-badge-free' : 'mp-badge-paid'}>
+            {prompt.price === 0 ? 'Free' : `₩${prompt.price.toLocaleString()}`}
+          </span>
+        </div>
+
+        {/* 좌우 2단 레이아웃 */}
+        <div className="flex gap-8">
+          {/* 좌측 — 설명 + 미리보기 */}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-zinc-600 leading-relaxed">{prompt.description}</p>
+
+            <h2 className="text-xs font-medium text-zinc-500 uppercase tracking-wider mt-6 mb-3">미리보기</h2>
+            <PromptPreview content={prompt.previewContent} />
+
+            {prompt.purchased && prompt.content && (
+              <>
+                <hr className="border-zinc-200 my-6" />
+                <h2 className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-3">전체 내용</h2>
+                <PromptPreview content={prompt.content} purchased />
+              </>
+            )}
+          </div>
+
+          {/* 우측 — 구매 패널 */}
+          <div className="w-80 shrink-0">
+            <div className="mp-card p-6 sticky top-6">
+              <div className="text-2xl font-bold text-zinc-900 mb-1">
+                {prompt.price === 0 ? '무료' : `₩${prompt.price.toLocaleString()}`}
               </div>
+              <p className="text-xs text-zinc-400 mb-4">
+                {prompt.price === 0 ? '로그인 후 바로 다운로드' : '구매 후 영구 이용 가능'}
+              </p>
 
-              <PromptPreview
-                content={prompt.purchased && prompt.content ? prompt.content : prompt.previewContent}
-                purchased={prompt.purchased}
-              />
-
-              {isSeller ? (
+              {!isLoggedIn && (
                 <button
-                  onClick={() => navigate(`/edit/${prompt.id}`)}
-                  className="w-full rounded-lg bg-white text-black font-medium hover:bg-neutral-200 px-4 py-2 transition-colors"
+                  onClick={() => navigate('/login')}
+                  className="mp-btn-terminal w-full justify-center"
                 >
-                  수정
-                </button>
-              ) : prompt.purchased ? (
-                <button
-                  onClick={handleDownload}
-                  disabled={downloading}
-                  className="w-full rounded-lg bg-amber-500 text-black font-medium hover:bg-amber-400 px-4 py-2 transition-colors disabled:opacity-50"
-                >
-                  {downloading ? '다운로드 중...' : '다운로드'}
-                </button>
-              ) : (
-                <button
-                  onClick={handlePurchase}
-                  disabled={purchasing}
-                  className="w-full rounded-lg bg-white text-black font-medium hover:bg-neutral-200 px-4 py-2 transition-colors disabled:opacity-50"
-                >
-                  {purchasing ? '처리 중...' : '구매하기'}
+                  로그인하고 받기
                 </button>
               )}
 
-              {error && <p className="text-red-500 text-xs">{error}</p>}
+              {isLoggedIn && !prompt.purchased && !isOwner && (
+                <button
+                  onClick={handlePurchase}
+                  disabled={purchasing}
+                  className="mp-btn-terminal w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {purchasing ? '처리 중...' : (prompt.price === 0 ? '> marketplace get' : '> marketplace buy')}
+                </button>
+              )}
+
+              {prompt.purchased && (
+                <button
+                  onClick={handleDownload}
+                  disabled={downloading}
+                  className="mp-btn-terminal w-full justify-center bg-green-800 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {downloading ? '다운로드 중...' : '> marketplace download'}
+                </button>
+              )}
+
+              {isOwner && (
+                <button
+                  onClick={() => navigate(`/edit/${prompt.id}`)}
+                  className="w-full text-sm text-zinc-600 border border-zinc-200 rounded-lg px-4 py-2 hover:bg-zinc-50 transition-colors"
+                >
+                  수정하기
+                </button>
+              )}
+
+              {error && <p className="mt-3 text-xs text-red-500">{error}</p>}
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   )
 }
