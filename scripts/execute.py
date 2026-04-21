@@ -65,13 +65,17 @@ class StepExecutor:
     CHORE_MSG = "chore({phase}): step {num} output"
     TZ = timezone(timedelta(hours=9))
 
-    def __init__(self, phase_dir_name: str, *, auto_push: bool = False):
+    # phase step 실행 시 사용할 모델 (harness.md 모델 전략 참고)
+    DEFAULT_MODEL = "claude-haiku-4-5-20251001"
+
+    def __init__(self, phase_dir_name: str, *, auto_push: bool = False, model: Optional[str] = None):
         self._root = str(ROOT)
         self._phases_dir = ROOT / "phases"
         self._phase_dir = self._phases_dir / phase_dir_name
         self._phase_dir_name = phase_dir_name
         self._top_index_file = self._phases_dir / "index.json"
         self._auto_push = auto_push
+        self._model = model or self.DEFAULT_MODEL
 
         if not self._phase_dir.is_dir():
             print(f"ERROR: {self._phase_dir} not found")
@@ -243,7 +247,8 @@ class StepExecutor:
 
         prompt = preamble + step_file.read_text(encoding="utf-8")
         result = subprocess.run(
-            ["claude", "-p", "--dangerously-skip-permissions", "--output-format", "json", prompt],
+            ["claude", "-p", "--dangerously-skip-permissions", "--output-format", "json",
+             "--model", self._model, prompt],
             cwd=self._root, capture_output=True, text=True, timeout=1800,
             encoding='utf-8', errors='replace',
         )
@@ -272,6 +277,7 @@ class StepExecutor:
         print(f"  Phase: {self._phase_name} | Steps: {self._total}")
         if self._auto_push:
             print(f"  Auto-push: enabled")
+        print(f"  Model: {self._model}")
         print(f"{'='*60}")
 
     def _check_blockers(self):
@@ -416,9 +422,14 @@ def main():
     parser = argparse.ArgumentParser(description="Harness Step Executor")
     parser.add_argument("phase_dir", help="Phase directory name (e.g. 0-mvp)")
     parser.add_argument("--push", action="store_true", help="Push branch after completion")
+    parser.add_argument(
+        "--model",
+        default=None,
+        help=f"Claude model ID for step execution (default: {StepExecutor.DEFAULT_MODEL})"
+    )
     args = parser.parse_args()
 
-    StepExecutor(args.phase_dir, auto_push=args.push).run()
+    StepExecutor(args.phase_dir, auto_push=args.push, model=args.model).run()
 
 
 if __name__ == "__main__":
