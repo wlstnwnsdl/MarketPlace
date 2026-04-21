@@ -163,3 +163,48 @@ execute.py가 자동으로 처리하는 것:
 
 - **error 발생 시**: `phases/{task-name}/index.json`에서 해당 step의 `status`를 `"pending"`으로 바꾸고 `error_message`를 삭제한 뒤 재실행한다.
 - **blocked 발생 시**: `blocked_reason`에 적힌 사유를 해결한 뒤, `status`를 `"pending"`으로 바꾸고 `blocked_reason`을 삭제한 뒤 재실행한다.
+
+---
+
+## 서버 라이프사이클
+
+### 서버 시작
+
+기능 개발 또는 통합 테스트가 필요할 때 서버를 직접 띄워 검증한다.
+
+**백엔드 (포트 8080)**
+```bash
+./gradlew bootRun          # .env 자동 로드 + 프론트엔드 빌드 포함
+./gradlew bootRun -x copyFrontend  # 프론트엔드 빌드 스킵 (백엔드만 빠르게)
+```
+
+**프론트엔드 개발 서버 (포트 5173, 선택)**
+```bash
+cd frontend
+npm run dev                # Vite HMR 활성화, /api/* 요청은 8080으로 프록시
+```
+
+> **주의**: `./gradlew test`는 `.env`를 자동 로드하지 않는다. 테스트 실행 전 환경 변수를 수동으로 설정해야 한다 (ADR-007 참고).
+
+### 검증
+
+```bash
+./gradlew test             # 백엔드 전체 테스트
+cd frontend && npm run build  # 프론트엔드 컴파일 에러 확인
+```
+
+### 서버 종료
+
+작업이 끝나면 반드시 서버를 내린다.
+
+```bash
+# bootRun / npm run dev 실행 중인 터미널에서
+Ctrl+C
+
+# 포트가 점유된 경우 (Windows)
+netstat -ano | findstr :8080
+taskkill /PID {PID} /F
+
+# 포트가 점유된 경우 (macOS/Linux)
+lsof -ti:8080 | xargs kill -9
+```

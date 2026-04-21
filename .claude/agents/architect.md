@@ -45,6 +45,24 @@ RefreshToken: userId(PK), token, expiryDate
 3. **구현 계획** — 단계별 task 목록 (개발 에이전트가 바로 실행 가능한 수준)
 4. **주의사항** — 금지 패턴, 보안 고려사항, 사이드이펙트
 
+## 서버 라이프사이클 (설계 검증 시)
+
+기존 동작을 분석하거나 통합 흐름을 확인해야 할 때 서버를 기동할 수 있다.
+
+```bash
+# 백엔드 (포트 8080)
+./gradlew bootRun          # .env 자동 로드
+
+# 종료
+Ctrl+C
+# 포트 점유 시 (Windows): netstat -ano | findstr :8080  →  taskkill /PID {PID} /F
+# 포트 점유 시 (macOS/Linux): lsof -ti:8080 | xargs kill -9
+```
+
+> 설계 단계에서 서버 기동은 선택사항이다. 코드 분석만으로 충분하면 기동하지 않아도 된다.
+
+---
+
 ## CRITICAL 규칙 (설계 시 반드시 지켜야 할 원칙)
 
 - 엔티티 간 `@ManyToOne` / `@OneToMany` 양방향 관계 설계 금지 → Long ID 직접 참조

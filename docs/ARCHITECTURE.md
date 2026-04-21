@@ -70,8 +70,10 @@ frontend/src/
 
 - **백엔드**: Layered Architecture (Controller → Service → Repository)
 - **인증**: Stateless JWT. JwtFilter가 매 요청마다 토큰을 검증하고 userId를 SecurityContext에 주입 (DB 조회 없음)
+- **보안 전략**: `/api/**`만 Spring Security 인증 강제. SPA 프론트엔드 라우트(`/`, `/login`, `/auth/callback`, `/mypage` 등)는 `anyRequest().permitAll()`로 통과 — React가 클라이언트에서 인증 처리 (ADR-006 참고)
 - **콘텐츠 접근 제어**: 프롬프트 상세 조회 시 Service 레이어에서 Purchase 여부를 확인한 뒤 전체 content 또는 previewContent만 반환 결정
 - **비동기**: @TransactionalEventListener(AFTER_COMMIT) + @Async — 구매 완료 후 다운로드 카운트 증가 등 후처리
+- **환경 변수**: `build.gradle`의 `bootRun` 태스크가 `.env` 파일을 자동 로드. `./gradlew bootRun`만으로 실행 가능 (ADR-007 참고)
 
 ## 데이터 흐름
 

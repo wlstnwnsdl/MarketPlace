@@ -9,7 +9,7 @@ export default function PromptPreview({ content, purchased = false }: PromptPrev
       <div className="relative rounded-lg bg-zinc-50 border border-zinc-200 p-4 font-mono text-sm text-zinc-700 leading-relaxed max-h-60 overflow-hidden">
         <pre className="whitespace-pre-wrap break-words">{content}</pre>
         {!purchased && (
-          <div className="absolute bottom-0 inset-x-0 h-12 bg-gradient-to-t from-zinc-50" />
+          <div className="absolute bottom-0 inset-x-0 h-12 bg-zinc-50" />
         )}
       </div>
       {!purchased && (

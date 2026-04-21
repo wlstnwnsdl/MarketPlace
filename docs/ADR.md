@@ -47,3 +47,21 @@ MVP 속도 최우선. 외부 의존성 최소화. 작동하는 최소 구현을 
 **이유**: 개발 환경 셋업을 최소화한다. H2의 PostgreSQL 호환 모드로 운영과 유사한 환경을 유지한다.
 
 **트레이드오프**: H2와 PostgreSQL의 미묘한 차이로 인한 운영 배포 버그 가능성. TEXT 타입 컬럼을 H2에서는 CLOB으로 처리하는 방식 차이 주의.
+
+---
+
+### ADR-006: Spring Security — SPA 라우트 전체 허용, API만 인증 강제
+**결정**: `SecurityConfig`에서 `/api/**` 경로만 인증을 요구하고, 나머지 모든 경로(`anyRequest().permitAll()`)는 Spring Security가 통과시킨다. SPA 프론트엔드 라우트의 인증 처리는 React 클라이언트가 담당한다.
+
+**이유**: 초기 구현의 `anyRequest().authenticated()`는 `/auth/callback`, `/login`, `/mypage` 등 SPA 라우트까지 차단해 OAuth2 로그인 후 무한 리디렉트 루프를 유발했다. SPA 구조에서 프론트엔드 라우트는 전부 `index.html`로 포워딩되고, 실제 인증 검증은 API 호출 시점에 서버에서, 화면 전환 시점에 클라이언트에서 이중으로 수행된다.
+
+**트레이드오프**: Spring Security가 SPA 라우트를 보호하지 않으므로 미인증 사용자가 `/mypage` URL을 직접 입력해도 서버는 200을 반환한다. 단, 실제 데이터를 요청하는 `/api/**` 호출은 서버에서 차단되므로 보안상 문제없다.
+
+---
+
+### ADR-007: Gradle `bootRun` 시 `.env` 자동 로드
+**결정**: `build.gradle`의 `bootRun` 태스크에서 `.env` 파일을 읽어 환경 변수를 JVM 프로세스에 자동 주입한다. 추가 라이브러리(spring-dotenv 등) 없이 Groovy 파일 파싱으로 구현한다.
+
+**이유**: `application.yml`이 `${GOOGLE_CLIENT_ID}`, `${GOOGLE_CLIENT_SECRET}`, `${JWT_SECRET}`를 환경 변수로 참조하는데, 개발자가 매번 `export $(grep -v '^#' .env | xargs)`를 실행하지 않으면 Spring Boot가 `Could not resolve placeholder` 오류로 시작에 실패한다. 이 단계를 생략하는 것이 "연결 안됨"의 주요 원인이었다.
+
+**트레이드오프**: `.env`가 없으면 조용히 빈 맵으로 실행되므로, 환경 변수 누락 오류는 Gradle이 아닌 Spring Boot 시작 시점에 발생한다. `./gradlew test`는 자동 로드 대상이 아니므로 테스트 실행 시에는 여전히 수동 로드가 필요하다.

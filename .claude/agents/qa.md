@@ -63,6 +63,49 @@ permissionMode: plan
 - [ ] 보라/인디고 브랜드 색상 미사용?
 - [ ] glow 애니메이션 미사용?
 
+## 서버 라이프사이클
+
+라이브 검증(HTTP 응답 확인, UI 동작 테스트)이 필요하면 서버를 직접 기동한다.
+
+### 시작
+
+```bash
+# 백엔드 (포트 8080, .env 자동 로드)
+./gradlew bootRun
+
+# 프론트엔드 개발 서버 (선택)
+cd frontend && npm run dev    # 포트 5173
+```
+
+### 검증 커맨드 예시
+
+```bash
+# 서버 응답 확인
+curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/
+curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/api/prompts
+
+# 정적 리소스 Content-Type 확인
+curl -sI http://localhost:8080/assets/index.js | grep content-type
+```
+
+### 종료
+
+검증이 끝나면 반드시 서버를 내린다.
+
+```bash
+# 실행 중인 터미널에서
+Ctrl+C
+
+# 포트가 점유된 경우 (Windows)
+netstat -ano | findstr :8080
+taskkill /PID {PID} /F
+
+# 포트가 점유된 경우 (macOS/Linux)
+lsof -ti:8080 | xargs kill -9
+```
+
+---
+
 ## 출력 형식
 
 검증 결과는 다음 구조로 작성:

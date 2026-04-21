@@ -47,6 +47,23 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+// bootRun 시 .env 자동 로드
+def dotenv = [:]
+if (file('.env').exists()) {
+    file('.env').eachLine { line ->
+        if (!line.startsWith('#') && line.trim() && line.contains('=')) {
+            def idx = line.indexOf('=')
+            def key = line.substring(0, idx).trim()
+            def val = line.substring(idx + 1).trim()
+            dotenv[key] = val
+        }
+    }
+}
+
+tasks.named('bootRun') {
+    environment dotenv
+}
+
 // Frontend build tasks
 def npmCmd = System.getProperty('os.name').toLowerCase().contains('win') ? ['cmd', '/c', 'npm'] : ['npm']
 

@@ -31,7 +31,7 @@ const TYPE_CONFIG: Record<PromptType, TypeConfig> = {
   CLAUDE_MD: {
     bg: 'bg-amber-50',
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b45309" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
         <polyline points="14 2 14 8 20 8" />
       </svg>
@@ -40,7 +40,7 @@ const TYPE_CONFIG: Record<PromptType, TypeConfig> = {
   AGENT: {
     bg: 'bg-blue-50',
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="8" r="4" />
         <path d="M20 21a8 8 0 1 0-16 0" />
       </svg>
@@ -49,7 +49,7 @@ const TYPE_CONFIG: Record<PromptType, TypeConfig> = {
   SKILL: {
     bg: 'bg-green-50',
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803d" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="16 18 22 12 16 6" />
         <polyline points="8 6 2 12 8 18" />
       </svg>
@@ -58,7 +58,7 @@ const TYPE_CONFIG: Record<PromptType, TypeConfig> = {
   SETTINGS: {
     bg: 'bg-zinc-100',
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#71717a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#52525b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="3" />
         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
       </svg>
@@ -67,7 +67,7 @@ const TYPE_CONFIG: Record<PromptType, TypeConfig> = {
   BUNDLE: {
     bg: 'bg-purple-50',
     icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7e22ce" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
         <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
         <path d="M16 3H8l-2 4h12z" />
       </svg>
@@ -276,7 +276,7 @@ export default function PromptDetailPage() {
                 <button
                   onClick={handleDownload}
                   disabled={downloading}
-                  className="mp-btn-terminal w-full justify-center bg-green-800 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="mp-btn-terminal w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {downloading ? '다운로드 중...' : '> marketplace download'}
                 </button>

@@ -38,9 +38,14 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+                        // OAuth2 / 인증 API
                         .requestMatchers("/oauth2/**", "/login/**", "/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/prompts", "/api/prompts/**").permitAll()
-                        .anyRequest().authenticated()
+                        // 프롬프트 공개 조회
+                        .requestMatchers(HttpMethod.GET, "/api/prompts", "/api/prompts/{id}").permitAll()
+                        // API 엔드포인트는 인증 필요
+                        .requestMatchers("/api/**").authenticated()
+                        // SPA 라우트 + 정적 리소스 — React가 클라이언트에서 인증 처리
+                        .anyRequest().permitAll()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(oAuth2UserService))

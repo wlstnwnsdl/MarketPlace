@@ -20,11 +20,11 @@ const ROLE_LABEL: Record<TargetRole, string> = {
 }
 
 const TYPE_ICON_BG: Record<PromptType, string> = {
-  CLAUDE_MD: 'bg-amber-50 text-amber-600',
-  AGENT: 'bg-blue-50 text-blue-600',
-  SKILL: 'bg-green-50 text-green-600',
-  SETTINGS: 'bg-zinc-100 text-zinc-500',
-  BUNDLE: 'bg-purple-50 text-purple-600',
+  CLAUDE_MD: 'bg-amber-50 text-amber-700',
+  AGENT: 'bg-blue-50 text-blue-700',
+  SKILL: 'bg-green-50 text-green-700',
+  SETTINGS: 'bg-zinc-100 text-zinc-600',
+  BUNDLE: 'bg-purple-50 text-purple-700',
 }
 
 function TypeIcon({ type }: { type: PromptType }) {
