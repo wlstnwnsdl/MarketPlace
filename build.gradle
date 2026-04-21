@@ -47,14 +47,15 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-// bootRun 시 .env 자동 로드
+// bootRun 시 .env 자동 로드 (CRLF 대응)
 def dotenv = [:]
 if (file('.env').exists()) {
     file('.env').eachLine { line ->
-        if (!line.startsWith('#') && line.trim() && line.contains('=')) {
-            def idx = line.indexOf('=')
-            def key = line.substring(0, idx).trim()
-            def val = line.substring(idx + 1).trim()
+        def cleaned = line.replaceAll(/\r/, '')
+        if (!cleaned.startsWith('#') && cleaned.trim() && cleaned.contains('=')) {
+            def idx = cleaned.indexOf('=')
+            def key = cleaned.substring(0, idx).trim()
+            def val = cleaned.substring(idx + 1).trim()
             dotenv[key] = val
         }
     }

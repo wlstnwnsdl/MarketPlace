@@ -64,4 +64,4 @@ MVP 속도 최우선. 외부 의존성 최소화. 작동하는 최소 구현을 
 
 **이유**: `application.yml`이 `${GOOGLE_CLIENT_ID}`, `${GOOGLE_CLIENT_SECRET}`, `${JWT_SECRET}`를 환경 변수로 참조하는데, 개발자가 매번 `export $(grep -v '^#' .env | xargs)`를 실행하지 않으면 Spring Boot가 `Could not resolve placeholder` 오류로 시작에 실패한다. 이 단계를 생략하는 것이 "연결 안됨"의 주요 원인이었다.
 
-**트레이드오프**: `.env`가 없으면 조용히 빈 맵으로 실행되므로, 환경 변수 누락 오류는 Gradle이 아닌 Spring Boot 시작 시점에 발생한다. `./gradlew test`는 자동 로드 대상이 아니므로 테스트 실행 시에는 여전히 수동 로드가 필요하다.
+**트레이드오프**: `.env`가 없으면 조용히 빈 맵으로 실행되므로, 환경 변수 누락 오류는 Gradle이 아닌 Spring Boot 시작 시점에 발생한다. `./gradlew test`는 자동 로드 대상이 아니므로 테스트 실행 시에는 여전히 수동 로드가 필요하다. Windows에서 `.env`를 CRLF로 저장하면 값 끝에 `\r`이 붙어 플레이스홀더 치환에 실패하므로, 파싱 시 `\r`을 명시적으로 제거한다.
