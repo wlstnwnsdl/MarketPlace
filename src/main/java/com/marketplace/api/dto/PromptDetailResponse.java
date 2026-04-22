@@ -1,6 +1,7 @@
 package com.marketplace.api.dto;
 
 import com.marketplace.domain.Prompt;
+import com.marketplace.domain.enums.PromptStatus;
 import com.marketplace.domain.enums.PromptType;
 import com.marketplace.domain.enums.TargetRole;
 import com.marketplace.service.PromptService.PromptDetail;
@@ -22,7 +23,8 @@ public record PromptDetailResponse(
         int downloadCount,
         List<String> tags,
         Long sellerId,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        PromptStatus status
 ) {
     public static PromptDetailResponse from(PromptDetail detail) {
         if (detail.purchased()) {
@@ -40,7 +42,8 @@ public record PromptDetailResponse(
                     prompt.getDownloadCount(),
                     prompt.getTags(),
                     prompt.getSellerId(),
-                    prompt.getCreatedAt()
+                    prompt.getCreatedAt(),
+                    prompt.getStatus()
             );
         } else {
             PromptWithoutContent view = detail.getPromptView();
@@ -57,7 +60,8 @@ public record PromptDetailResponse(
                     view.downloadCount(),
                     view.tags(),
                     view.sellerId(),
-                    view.createdAt()
+                    view.createdAt(),
+                    view.status()
             );
         }
     }

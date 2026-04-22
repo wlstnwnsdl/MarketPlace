@@ -65,3 +65,42 @@ MVP 속도 최우선. 외부 의존성 최소화. 작동하는 최소 구현을 
 **이유**: `application.yml`이 `${GOOGLE_CLIENT_ID}`, `${GOOGLE_CLIENT_SECRET}`, `${JWT_SECRET}`를 환경 변수로 참조하는데, 개발자가 매번 `export $(grep -v '^#' .env | xargs)`를 실행하지 않으면 Spring Boot가 `Could not resolve placeholder` 오류로 시작에 실패한다. 이 단계를 생략하는 것이 "연결 안됨"의 주요 원인이었다.
 
 **트레이드오프**: `.env`가 없으면 조용히 빈 맵으로 실행되므로, 환경 변수 누락 오류는 Gradle이 아닌 Spring Boot 시작 시점에 발생한다. `./gradlew test`는 자동 로드 대상이 아니므로 테스트 실행 시에는 여전히 수동 로드가 필요하다. Windows에서 `.env`를 CRLF로 저장하면 값 끝에 `\r`이 붙어 플레이스홀더 치환에 실패하므로, 파싱 시 `\r`을 명시적으로 제거한다.
+
+
+---
+
+### ADR-008: PromptStatus — 판매자 주도 공개 상태 관리
+**결정**: 프롬프트에 PENDING / PUBLIC / PRIVATE 3단계 공개 상태를 도입한다. 홈 목록(`GET /api/prompts`)은 PUBLIC만 노출하고, PENDING/PRIVATE 프롬프트는 소유자 본인만 접근 가능하다(타인 접근 시 404). 프론트엔드 등록 폼의 기본값은 PENDING이다.
+
+**이유**: 작성 중인 프롬프트를 임시 저장(PENDING)하거나, 공개 후 비공개(PRIVATE)로 전환하는 플로우가 필요했다. 비공개 URL을 타인에게 노출하지 않으려면 403 대신 404로 응답해야 "ID가 존재한다"는 정보가 새지 않는다. 기본값을 PENDING으로 바꾼 이유는 등록 직후 PUBLIC 상태에서 소유자가 자신의 content를 확인할 수 없는 버그(ADR-010 참고)를 방지하기 위함이다.
+
+**트레이드오프**: 이미 구매한 사용자가 판매자의 PRIVATE 전환 후에도 다운로드 가능하다(구매 권리 보호). 향후 관리자 검수 플로우 추가 시 별도 상태(UNDER_REVIEW 등)를 추가해야 한다.
+
+---
+
+---
+
+### ADR-010: 소유자 콘텐츠 접근 — Purchase 우선순위보다 소유권 우선
+**결정**: `PromptService.findPromptDetail()`에서 소유자(sellerId == requesterId) 확인을 Purchase 조회보다 먼저 수행한다. 소유자는 프롬프트 status·구매 여부와 무관하게 `purchased=true`와 함께 전체 content를 반환받는다. 다운로드 API(`getContentForDownload`)도 동일하게 소유자 우선 검증을 적용한다.
+
+**이유**: 기존 로직은 PUBLIC 프롬프트를 소유자가 조회해도 Purchase 레코드가 없으면 previewContent만 반환하는 버그가 있었다. 이로 인해 등록 직후 content가 저장됐음에도 화면에서 빈 미리보기가 표시되고, 수정 폼을 열면 content 필드가 비어 있어 덮어쓰기하면 데이터가 유실됐다.
+
+**트레이드오프**: 소유자는 자신이 등록한 프롬프트를 구매하지 않아도 전체 content를 열람·다운로드할 수 있다. 이는 의도된 동작이다.
+
+---
+
+### ADR-011: 사용자 프로필 — JWT 클레임 대신 /api/users/me DB 조회
+**결정**: 헤더의 프로필 버튼 클릭 시 표시할 email/name은 JWT를 디코딩하는 대신 `GET /api/users/me`를 호출해 DB에서 조회한다.
+
+**이유**: 현재 JWT 클레임에는 userId(subject)와 type만 포함되어 있다. email을 클레임에 추가하면 JWT 크기가 늘고, email 변경 시 기존 토큰과 불일치 문제가 생긴다. 프로필 조회는 빈도가 낮으므로(페이지 마운트 1회) DB 조회 비용이 허용 가능하다.
+
+**트레이드오프**: 헤더 컴포넌트 마운트마다 API 요청 1회 발생. 향후 토큰 갱신 없이 email을 JWT에 포함시키는 방식으로 전환 시 이 엔드포인트 제거 가능.
+
+---
+
+### ADR-009: 태그 검색 — EXISTS 서브쿼리
+**결정**: `findWithFilters` JPQL에서 태그 검색을 `LEFT JOIN p.tags t` 방식이 아닌 `EXISTS (SELECT t FROM Prompt p2 JOIN p2.tags t WHERE p2 = p AND t LIKE ...)` 서브쿼리로 구현한다.
+
+**이유**: LEFT JOIN + DISTINCT 방식은 @ElementCollection과 함께 사용 시 Spring Data JPA의 페이지네이션 count 쿼리가 중복 카운트를 반환하는 문제가 있다. EXISTS 서브쿼리는 원본 쿼리와 count 쿼리 분리 없이 정확한 페이지네이션을 보장한다.
+
+**트레이드오프**: EXISTS 서브쿼리는 대용량 데이터에서 LEFT JOIN보다 느릴 수 있다. prompt_tags에 인덱스가 추가된 운영 환경에서는 성능을 재검토한다.

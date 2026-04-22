@@ -67,11 +67,31 @@ permissionMode: plan
 
 라이브 검증(HTTP 응답 확인, UI 동작 테스트)이 필요하면 서버를 직접 기동한다.
 
+### 빌드·실행 전 필수: .env 로드
+
+bash에서 gradlew를 직접 실행하면 JAVA_HOME이 잡히지 않아 Java 8로 실행되고 빌드가 실패한다.
+**반드시 아래 명령을 먼저 실행한 뒤 gradlew를 호출한다.**
+
+```bash
+# .env에서 JAVA_HOME, JWT_SECRET 등 환경 변수 로드
+export $(grep -v '^#' .env | xargs)
+
+# 이후 build / test / bootRun 모두 이 셸에서 실행
+./gradlew build -x test 2>&1 | tail -20
+./gradlew bootRun
+```
+
+Windows PowerShell에서 실행할 경우 `.\run.ps1`이 .env 로드를 자동으로 처리한다.
+
 ### 시작
 
 ```bash
-# 백엔드 (포트 8080, .env 자동 로드)
+# bash (Git Bash / WSL)
+export $(grep -v '^#' .env | xargs)
 ./gradlew bootRun
+
+# Windows PowerShell (권장)
+.\run.ps1
 
 # 프론트엔드 개발 서버 (선택)
 cd frontend && npm run dev    # 포트 5173

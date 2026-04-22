@@ -20,16 +20,16 @@
   }
 
   .mp-btn-terminal {
-    @apply bg-zinc-900 text-white text-xs font-mono px-4 py-2 rounded-lg
-           hover:bg-zinc-700 transition-colors flex items-center gap-2;
+    @apply bg-[#4D61E6] text-white text-xs font-mono px-4 py-2 rounded-lg
+           hover:bg-[#3d50d4] transition-colors flex items-center gap-2;
   }
 
   .mp-tab-active {
-    @apply bg-zinc-900 text-white text-sm font-medium px-4 py-1.5 rounded-full;
+    @apply bg-[#4D61E6] text-white text-sm font-medium px-4 py-1.5 rounded-full;
   }
 
   .mp-tab-inactive {
-    @apply text-zinc-500 text-sm hover:text-zinc-900 px-4 py-1.5 rounded-full
+    @apply text-zinc-500 text-sm hover:text-[#4D61E6] px-4 py-1.5 rounded-full
            hover:bg-zinc-100 transition-colors;
   }
 

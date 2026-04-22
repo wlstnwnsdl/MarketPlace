@@ -1,5 +1,5 @@
 import client from './client'
-import type { PageResponse, PromptDetail, PromptSummary, PromptType, TargetRole } from '../types'
+import type { PageResponse, PromptDetail, PromptStatus, PromptSummary, PromptType, TargetRole } from '../types'
 
 export async function listPrompts(params: {
   type?: PromptType
@@ -25,6 +25,7 @@ export async function createPrompt(payload: {
   targetRole?: TargetRole
   price: number
   tags: string[]
+  status: PromptStatus
 }): Promise<PromptSummary> {
   const { data } = await client.post<PromptSummary>('/prompts', payload)
   return data
@@ -36,9 +37,11 @@ export async function updatePrompt(
     title: string
     description: string
     content: string
+    type: PromptType
     targetRole?: TargetRole
     price: number
     tags: string[]
+    status: PromptStatus
   }
 ): Promise<PromptSummary> {
   const { data } = await client.put<PromptSummary>(`/prompts/${id}`, payload)

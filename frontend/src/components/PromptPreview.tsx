@@ -1,5 +1,5 @@
 interface PromptPreviewProps {
-  content: string
+  content: string | null | undefined
   purchased?: boolean
 }
 

@@ -2,6 +2,7 @@ package com.marketplace.service;
 
 import com.marketplace.api.exception.UnauthorizedException;
 import com.marketplace.domain.Prompt;
+import com.marketplace.domain.enums.PromptStatus;
 import com.marketplace.domain.enums.PromptType;
 import com.marketplace.domain.enums.TargetRole;
 import com.marketplace.repository.PromptRepository;
@@ -47,6 +48,7 @@ class PromptServiceTest {
                 .targetRole(TargetRole.DEVELOPER)
                 .price(0)
                 .tags(List.of("java", "spring"))
+                .status(PromptStatus.PUBLIC)
                 .build();
     }
 
@@ -85,7 +87,7 @@ class PromptServiceTest {
 
         assertThatThrownBy(() ->
                 promptService.createPrompt(1L, "title", "desc", oversizedContent,
-                        PromptType.CLAUDE_MD, TargetRole.DEVELOPER, 0, List.of()))
+                        PromptType.CLAUDE_MD, TargetRole.DEVELOPER, 0, List.of(), PromptStatus.PUBLIC))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("50KB");
     }
@@ -107,7 +109,7 @@ class PromptServiceTest {
         given(promptRepository.save(any(Prompt.class))).willReturn(savedPrompt);
 
         Prompt result = promptService.createPrompt(1L, "title", "desc", longContent,
-                PromptType.AGENT, TargetRole.DEVELOPER, 0, List.of());
+                PromptType.AGENT, TargetRole.DEVELOPER, 0, List.of(), PromptStatus.PUBLIC);
 
         assertThat(result.getPreviewContent()).hasSize(500);
         assertThat(result.getPreviewContent()).isEqualTo("A".repeat(500));

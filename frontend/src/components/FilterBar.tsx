@@ -23,6 +23,9 @@ const ROLE_OPTIONS: { label: string; value: TargetRole | undefined }[] = [
   { label: 'Developer', value: 'DEVELOPER' },
   { label: 'Planner', value: 'PLANNER' },
   { label: 'Designer', value: 'DESIGNER' },
+  { label: 'PM', value: 'PM' },
+  { label: 'Marketer', value: 'MARKETER' },
+  { label: 'Sales', value: 'SALES' },
 ]
 
 export default function FilterBar({ type, targetRole, keyword, onTypeChange, onRoleChange, onKeywordChange }: FilterBarProps) {

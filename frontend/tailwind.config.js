@@ -12,7 +12,8 @@ export default {
         'text-muted': '#a1a1aa',
         'badge-free': '#f0fdf4',
         'badge-free-text': '#15803d',
-        cta: '#18181b',
+        cta: '#4D61E6',
+        'cta-hover': '#3d50d4',
         'cta-text': '#ffffff',
       },
       fontFamily: {

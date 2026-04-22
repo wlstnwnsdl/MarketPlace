@@ -24,3 +24,7 @@ src/main/resources/static/
 
 # JARs
 *.jar
+
+# Report
+report/
+request.md

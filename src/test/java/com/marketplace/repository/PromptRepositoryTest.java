@@ -1,6 +1,7 @@
 package com.marketplace.repository;
 
 import com.marketplace.domain.Prompt;
+import com.marketplace.domain.enums.PromptStatus;
 import com.marketplace.domain.enums.PromptType;
 import com.marketplace.domain.enums.TargetRole;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,7 +60,7 @@ class PromptRepositoryTest {
     @Test
     void findWithFilters_typeOnly_returnsMatchingType() {
         Page<Prompt> result = promptRepository.findWithFilters(
-            PromptType.AGENT, null, null, PageRequest.of(0, 10)
+            PromptType.AGENT, null, null, null, PageRequest.of(0, 10)
         );
 
         assertThat(result.getContent()).hasSize(1);
@@ -69,7 +70,7 @@ class PromptRepositoryTest {
     @Test
     void findWithFilters_keyword_matchesTitleContaining() {
         Page<Prompt> result = promptRepository.findWithFilters(
-            null, null, "Spring Boot", PageRequest.of(0, 10)
+            null, null, null, "Spring Boot", PageRequest.of(0, 10)
         );
 
         assertThat(result.getContent()).hasSize(1);
@@ -79,9 +80,33 @@ class PromptRepositoryTest {
     @Test
     void findWithFilters_allNullParams_returnsAll() {
         Page<Prompt> result = promptRepository.findWithFilters(
-            null, null, null, PageRequest.of(0, 10)
+            null, null, null, null, PageRequest.of(0, 10)
         );
 
         assertThat(result.getContent()).hasSize(3);
+    }
+
+    @Test
+    void findWithFilters_statusFilter_returnsOnlyPublic() {
+        promptRepository.saveAll(List.of(
+            Prompt.builder()
+                .sellerId(1L)
+                .title("Public Prompt")
+                .description("Public")
+                .content("content")
+                .previewContent("preview")
+                .type(PromptType.CLAUDE_MD)
+                .targetRole(TargetRole.DEVELOPER)
+                .price(0)
+                .status(PromptStatus.PUBLIC)
+                .build()
+        ));
+
+        Page<Prompt> result = promptRepository.findWithFilters(
+            null, null, PromptStatus.PUBLIC, null, PageRequest.of(0, 10)
+        );
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getStatus()).isEqualTo(PromptStatus.PUBLIC);
     }
 }

@@ -3,6 +3,7 @@ package com.marketplace.api;
 import com.marketplace.api.exception.AlreadyPurchasedException;
 import com.marketplace.api.exception.PromptNotFoundException;
 import com.marketplace.api.exception.UnauthorizedException;
+import com.marketplace.api.exception.UserNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,6 +20,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PromptNotFoundException.class)
     public ResponseEntity<ErrorResponse> handlePromptNotFound(PromptNotFoundException e) {
         return ResponseEntity.status(404).body(new ErrorResponse(e.getMessage(), "PROMPT_NOT_FOUND"));
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException e) {
+        return ResponseEntity.status(404).body(new ErrorResponse(e.getMessage(), "USER_NOT_FOUND"));
     }
 
     @ExceptionHandler(AlreadyPurchasedException.class)

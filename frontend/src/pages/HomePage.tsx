@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getMe } from '../api/user'
 import { listPrompts } from '../api/prompts'
 import { getMyPurchases } from '../api/purchases'
 import FilterBar from '../components/FilterBar'
 import PromptCard from '../components/PromptCard'
-import type { PageResponse, PromptSummary, PromptType, TargetRole } from '../types'
+import type { PageResponse, PromptSummary, PromptType, TargetRole, UserProfile } from '../types'
 
 function StatCard({ label, value }: { label: string; value: number | null }) {
   return (
     <div className="text-right">
-      <div className="text-2xl font-bold text-zinc-900 leading-none">
+      <div className="text-2xl font-bold text-zinc-900 leading-none min-w-[2.5rem]">
         {value === null ? '—' : value}
       </div>
       <div className="text-xs font-medium text-zinc-400 uppercase tracking-wider mt-0.5">{label}</div>
@@ -35,6 +36,9 @@ export default function HomePage() {
   const [data, setData] = useState<PageResponse<PromptSummary> | null>(null)
   const [loading, setLoading] = useState(true)
   const [purchasedCount, setPurchasedCount] = useState<number | null>(null)
+  const [user, setUser] = useState<UserProfile | null>(null)
+  const [showProfile, setShowProfile] = useState(false)
+  const profileRef = useRef<HTMLDivElement>(null)
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -43,10 +47,22 @@ export default function HomePage() {
       getMyPurchases()
         .then((ids) => setPurchasedCount(ids.length))
         .catch(() => setPurchasedCount(0))
+      getMe().then(setUser).catch(() => {})
     } else {
       setPurchasedCount(0)
     }
   }, [isLoggedIn])
+
+  useEffect(() => {
+    if (!showProfile) return
+    function handleClickOutside(e: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setShowProfile(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showProfile])
 
   const handleKeywordChange = (value: string) => {
     setKeyword(value)
@@ -92,8 +108,11 @@ export default function HomePage() {
       {/* Header */}
       <header className="bg-white border-b border-zinc-200 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-zinc-900 rounded-lg flex items-center justify-center">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          >
+            <div className="w-8 h-8 bg-[#4D61E6] rounded-lg flex items-center justify-center">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
                 <line x1="3" y1="6" x2="21" y2="6" />
@@ -101,12 +120,12 @@ export default function HomePage() {
               </svg>
             </div>
             <span className="font-semibold text-zinc-900 text-lg">Marketplace</span>
-          </div>
+          </button>
 
           <div className="flex items-center gap-8">
             <StatCard label="Available" value={totalCount} />
             <StatCard label="Purchased" value={purchasedCount} />
-            {isLoggedIn && (
+            {isLoggedIn ? (
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => navigate('/mypage')}
@@ -114,9 +133,22 @@ export default function HomePage() {
                 >
                   마이페이지
                 </button>
+                <div className="relative" ref={profileRef}>
+                  <button
+                    onClick={() => setShowProfile((v) => !v)}
+                    className="w-8 h-8 rounded-full bg-[#4D61E6] flex items-center justify-center text-white text-xs font-semibold hover:opacity-80 transition-opacity"
+                  >
+                    {user?.name?.[0]?.toUpperCase() ?? '?'}
+                  </button>
+                  {showProfile && (
+                    <div className="absolute right-0 top-10 bg-white border border-zinc-200 rounded-xl shadow-lg p-4 z-50 min-w-[220px]">
+                      <p className="text-sm font-medium text-zinc-900 truncate">{user?.name ?? '사용자'}</p>
+                      <p className="text-xs text-zinc-500 mt-0.5 truncate">{user?.email ?? ''}</p>
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-            {!isLoggedIn && (
+            ) : (
               <button
                 onClick={() => navigate('/login')}
                 className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors"
@@ -150,7 +182,7 @@ export default function HomePage() {
           {isLoggedIn && (
             <button
               onClick={() => navigate('/upload')}
-              className="shrink-0 px-4 py-2.5 bg-zinc-900 text-white text-sm font-medium rounded-xl hover:bg-zinc-700 transition-colors"
+              className="shrink-0 px-4 py-2.5 bg-[#4D61E6] text-white text-sm font-medium rounded-xl hover:bg-[#3d50d4] transition-colors"
             >
               + 등록하기
             </button>

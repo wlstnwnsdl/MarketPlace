@@ -1,5 +1,12 @@
+export interface UserProfile {
+  id: number
+  email: string
+  name: string
+}
+
 export type PromptType = 'CLAUDE_MD' | 'AGENT' | 'SKILL' | 'SETTINGS' | 'BUNDLE'
-export type TargetRole = 'DEVELOPER' | 'PLANNER' | 'DESIGNER'
+export type TargetRole = 'DEVELOPER' | 'PLANNER' | 'DESIGNER' | 'PM' | 'MARKETER' | 'SALES'
+export type PromptStatus = 'PENDING' | 'PUBLIC' | 'PRIVATE'
 
 export interface PromptSummary {
   id: number
@@ -13,6 +20,7 @@ export interface PromptSummary {
   tags: string[]
   sellerId: number
   createdAt: string
+  status: PromptStatus
 }
 
 export interface PromptDetail extends PromptSummary {

@@ -20,6 +20,9 @@ const ROLE_LABEL: Record<TargetRole, string> = {
   DEVELOPER: '개발자',
   PLANNER: '기획자',
   DESIGNER: '디자이너',
+  PM: 'PM',
+  MARKETER: '마케터',
+  SALES: '영업',
 }
 
 interface TypeConfig {
@@ -232,7 +235,10 @@ export default function PromptDetailPage() {
             <p className="text-sm text-zinc-600 leading-relaxed">{prompt.description}</p>
 
             <h2 className="text-xs font-medium text-zinc-500 uppercase tracking-wider mt-6 mb-3">미리보기</h2>
-            <PromptPreview content={prompt.previewContent} />
+            <PromptPreview
+              content={prompt.previewContent || (prompt.purchased && prompt.content ? prompt.content : '') || ''}
+              purchased={prompt.purchased}
+            />
 
             {prompt.purchased && prompt.content && (
               <>
@@ -268,7 +274,7 @@ export default function PromptDetailPage() {
                   disabled={purchasing}
                   className="mp-btn-terminal w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {purchasing ? '처리 중...' : (prompt.price === 0 ? '> marketplace get' : '> marketplace buy')}
+                  {purchasing ? '처리 중...' : (prompt.price === 0 ? '무료로 받기' : '구매하기')}
                 </button>
               )}
 
@@ -278,7 +284,7 @@ export default function PromptDetailPage() {
                   disabled={downloading}
                   className="mp-btn-terminal w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {downloading ? '다운로드 중...' : '> marketplace download'}
+                  {downloading ? '다운로드 중...' : '다운로드'}
                 </button>
               )}
 

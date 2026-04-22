@@ -3,6 +3,7 @@ package com.marketplace.service;
 import com.marketplace.api.exception.PromptNotFoundException;
 import com.marketplace.api.exception.UnauthorizedException;
 import com.marketplace.domain.Prompt;
+import com.marketplace.domain.enums.PromptStatus;
 import com.marketplace.domain.enums.PromptType;
 import com.marketplace.domain.enums.TargetRole;
 import com.marketplace.repository.PromptRepository;
@@ -12,14 +13,17 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class PromptService {
 
     private static final int MAX_CONTENT_BYTES = 51200;
-    private static final int PREVIEW_LENGTH = 500;
+    private static final int PREVIEW_MAX_LINES = 5;
+    private static final int PREVIEW_MAX_CHARS = 500;
 
     private final PromptRepository promptRepository;
     private final PurchaseRepository purchaseRepository;
@@ -29,20 +33,44 @@ public class PromptService {
         this.purchaseRepository = purchaseRepository;
     }
 
-    @Transactional(readOnly = true)
-    public Page<Prompt> findPrompts(PromptType type, TargetRole targetRole, String keyword, int page, int size) {
-        return promptRepository.findWithFilters(type, targetRole, keyword, PageRequest.of(page, size));
+    /**
+     * content에서 처음 5줄만 추출하고, 500자를 초과하면 500자로 자른다.
+     */
+    private String buildPreviewContent(String content) {
+        if (content == null) return null;
+        String[] lines = content.split("\n", -1);
+        String preview = Arrays.stream(lines)
+                .limit(PREVIEW_MAX_LINES)
+                .collect(Collectors.joining("\n"));
+        if (preview.length() > PREVIEW_MAX_CHARS) {
+            preview = preview.substring(0, PREVIEW_MAX_CHARS);
+        }
+        return preview;
     }
 
     @Transactional(readOnly = true)
-    public PromptDetail findPromptDetail(Long promptId, Long buyerId) {
+    public Page<Prompt> findPrompts(PromptType type, TargetRole targetRole, String keyword, int page, int size) {
+        return promptRepository.findWithFilters(type, targetRole, PromptStatus.PUBLIC, keyword, PageRequest.of(page, size));
+    }
+
+    @Transactional(readOnly = true)
+    public PromptDetail findPromptDetail(Long promptId, Long requesterId) {
         Prompt prompt = promptRepository.findById(promptId)
                 .orElseThrow(() -> new PromptNotFoundException(promptId));
 
-        boolean purchased = buyerId != null && purchaseRepository.existsByBuyerIdAndPromptId(buyerId, promptId);
+        // 소유자는 상태와 무관하게 전체 내용 반환
+        if (requesterId != null && requesterId.equals(prompt.getSellerId())) {
+            return new PromptDetail(prompt, true);
+        }
+
+        // PUBLIC이 아닌 경우: 소유자 외 404
+        if (prompt.getStatus() != PromptStatus.PUBLIC) {
+            throw new PromptNotFoundException(promptId);
+        }
+
+        boolean purchased = requesterId != null && purchaseRepository.existsByBuyerIdAndPromptId(requesterId, promptId);
 
         if (!purchased) {
-            // content를 노출하지 않기 위해 previewContent만 담긴 뷰 객체 반환
             return new PromptDetail(new PromptWithoutContent(prompt), false);
         }
 
@@ -50,7 +78,8 @@ public class PromptService {
     }
 
     public Prompt createPrompt(Long sellerId, String title, String description, String content,
-                               PromptType type, TargetRole targetRole, int price, List<String> tags) {
+                               PromptType type, TargetRole targetRole, int price, List<String> tags,
+                               PromptStatus status) {
         if (content != null && content.getBytes().length > MAX_CONTENT_BYTES) {
             throw new IllegalArgumentException("Content exceeds 50KB limit");
         }
@@ -58,9 +87,7 @@ public class PromptService {
             throw new IllegalArgumentException("Price cannot be negative");
         }
 
-        String previewContent = content != null
-                ? content.substring(0, Math.min(PREVIEW_LENGTH, content.length()))
-                : null;
+        String previewContent = buildPreviewContent(content);
 
         Prompt prompt = Prompt.builder()
                 .sellerId(sellerId)
@@ -72,13 +99,15 @@ public class PromptService {
                 .targetRole(targetRole)
                 .price(price)
                 .tags(tags)
+                .status(status)
                 .build();
 
         return promptRepository.save(prompt);
     }
 
     public Prompt updatePrompt(Long promptId, Long sellerId, String title, String description,
-                               String content, TargetRole targetRole, int price, List<String> tags) {
+                               String content, TargetRole targetRole, int price, List<String> tags,
+                               PromptStatus status) {
         Prompt prompt = promptRepository.findById(promptId)
                 .orElseThrow(() -> new PromptNotFoundException(promptId));
 
@@ -86,12 +115,15 @@ public class PromptService {
             throw new UnauthorizedException("Not authorized to update this prompt");
         }
 
-        String previewContent = content != null
-                ? content.substring(0, Math.min(PREVIEW_LENGTH, content.length()))
-                : null;
+        String previewContent = buildPreviewContent(content);
 
-        prompt.update(title, description, content, previewContent, prompt.getType(), targetRole, price, tags);
+        prompt.update(title, description, content, previewContent, prompt.getType(), targetRole, price, tags, status);
         return prompt;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Prompt> getMyPrompts(Long sellerId) {
+        return promptRepository.findBySellerIdOrderByCreatedAtDesc(sellerId);
     }
 
     public void deletePrompt(Long promptId, Long sellerId) {
@@ -106,11 +138,14 @@ public class PromptService {
     }
 
     @Transactional(readOnly = true)
-    public String getContentForDownload(Long promptId, Long buyerId) {
+    public String getContentForDownload(Long promptId, Long requesterId) {
         Prompt prompt = promptRepository.findById(promptId)
                 .orElseThrow(() -> new PromptNotFoundException(promptId));
 
-        if (!purchaseRepository.existsByBuyerIdAndPromptId(buyerId, promptId)) {
+        boolean isOwner = prompt.getSellerId().equals(requesterId);
+        boolean isPurchased = purchaseRepository.existsByBuyerIdAndPromptId(requesterId, promptId);
+
+        if (!isOwner && !isPurchased) {
             throw new UnauthorizedException("Purchase required to download this prompt");
         }
 
@@ -148,7 +183,8 @@ public class PromptService {
             int price,
             int downloadCount,
             java.util.List<String> tags,
-            java.time.LocalDateTime createdAt
+            java.time.LocalDateTime createdAt,
+            com.marketplace.domain.enums.PromptStatus status
     ) {
         public PromptWithoutContent(Prompt prompt) {
             this(
@@ -162,7 +198,8 @@ public class PromptService {
                     prompt.getPrice(),
                     prompt.getDownloadCount(),
                     prompt.getTags(),
-                    prompt.getCreatedAt()
+                    prompt.getCreatedAt(),
+                    prompt.getStatus()
             );
         }
     }

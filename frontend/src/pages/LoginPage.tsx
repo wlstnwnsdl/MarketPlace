@@ -4,7 +4,7 @@ export default function LoginPage() {
       <div className="mp-card p-10 w-full max-w-sm">
         <div className="flex flex-col items-center mb-8">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 bg-zinc-900 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-[#4D61E6] rounded-lg flex items-center justify-center">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
                 <line x1="3" y1="6" x2="21" y2="6" />

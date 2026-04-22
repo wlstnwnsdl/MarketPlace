@@ -17,6 +17,9 @@ const ROLE_LABEL: Record<TargetRole, string> = {
   DEVELOPER: 'Developer',
   PLANNER: 'Planner',
   DESIGNER: 'Designer',
+  PM: 'PM',
+  MARKETER: 'Marketer',
+  SALES: 'Sales',
 }
 
 const TYPE_ICON_BG: Record<PromptType, string> = {

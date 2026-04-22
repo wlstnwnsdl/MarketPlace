@@ -1,6 +1,7 @@
 package com.marketplace.api.dto;
 
 import com.marketplace.domain.Prompt;
+import com.marketplace.domain.enums.PromptStatus;
 import com.marketplace.domain.enums.PromptType;
 import com.marketplace.domain.enums.TargetRole;
 import com.marketplace.service.PromptService.PromptWithoutContent;
@@ -19,7 +20,8 @@ public record PromptSummaryResponse(
         int downloadCount,
         List<String> tags,
         Long sellerId,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        PromptStatus status
 ) {
     public static PromptSummaryResponse from(Prompt prompt) {
         return new PromptSummaryResponse(
@@ -33,7 +35,8 @@ public record PromptSummaryResponse(
                 prompt.getDownloadCount(),
                 prompt.getTags(),
                 prompt.getSellerId(),
-                prompt.getCreatedAt()
+                prompt.getCreatedAt(),
+                prompt.getStatus()
         );
     }
 
@@ -49,7 +52,8 @@ public record PromptSummaryResponse(
                 view.downloadCount(),
                 view.tags(),
                 view.sellerId(),
-                view.createdAt()
+                view.createdAt(),
+                view.status()
         );
     }
 }

@@ -1,5 +1,6 @@
 package com.marketplace.api.dto;
 
+import com.marketplace.domain.enums.PromptStatus;
 import com.marketplace.domain.enums.PromptType;
 import com.marketplace.domain.enums.TargetRole;
 import jakarta.validation.constraints.NotBlank;
@@ -15,5 +16,6 @@ public record PromptRequest(
         @NotNull PromptType type,
         TargetRole targetRole,
         int price,
-        List<String> tags
+        List<String> tags,
+        PromptStatus status
 ) {}

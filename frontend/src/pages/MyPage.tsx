@@ -103,19 +103,30 @@ export default function MyPage() {
               : myPrompts.map((p) => (
                   <div key={p.id} className="flex flex-col">
                     <PromptCard prompt={p} onClick={() => navigate(`/prompts/${p.id}`)} />
-                    <div className="flex gap-2 mt-2 px-1">
-                      <button
-                        onClick={() => navigate(`/edit/${p.id}`)}
-                        className="text-xs text-zinc-500 hover:text-zinc-900 transition-colors"
-                      >
-                        수정
-                      </button>
-                      <button
-                        onClick={() => handleDelete(p.id)}
-                        className="text-xs text-red-400 hover:text-red-600 transition-colors"
-                      >
-                        삭제
-                      </button>
+                    <div className="flex items-center justify-between mt-2 px-1">
+                      <span className={
+                        p.status === 'PUBLIC'
+                          ? 'text-xs px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200 font-medium'
+                          : p.status === 'PRIVATE'
+                          ? 'text-xs px-2 py-0.5 rounded-full bg-orange-50 text-orange-700 border border-orange-200 font-medium'
+                          : 'text-xs px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-500 border border-zinc-200 font-medium'
+                      }>
+                        {p.status === 'PUBLIC' ? '공개' : p.status === 'PRIVATE' ? '미공개' : '대기'}
+                      </span>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => navigate(`/edit/${p.id}`)}
+                          className="text-xs text-zinc-500 hover:text-zinc-900 transition-colors"
+                        >
+                          수정
+                        </button>
+                        <button
+                          onClick={() => handleDelete(p.id)}
+                          className="text-xs text-red-400 hover:text-red-600 transition-colors"
+                        >
+                          삭제
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}

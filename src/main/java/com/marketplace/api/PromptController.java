@@ -64,7 +64,8 @@ public class PromptController {
         Long userId = (Long) authentication.getPrincipal();
         Prompt prompt = promptService.createPrompt(
                 userId, request.title(), request.description(), request.content(),
-                request.type(), request.targetRole(), request.price(), request.tags());
+                request.type(), request.targetRole(), request.price(), request.tags(),
+                request.status());
 
         return ResponseEntity.ok(PromptSummaryResponse.from(prompt));
     }
@@ -78,7 +79,8 @@ public class PromptController {
         Long userId = (Long) authentication.getPrincipal();
         Prompt prompt = promptService.updatePrompt(
                 id, userId, request.title(), request.description(), request.content(),
-                request.targetRole(), request.price(), request.tags());
+                request.targetRole(), request.price(), request.tags(),
+                request.status());
 
         return ResponseEntity.ok(PromptSummaryResponse.from(prompt));
     }
