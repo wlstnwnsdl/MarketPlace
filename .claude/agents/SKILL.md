@@ -37,7 +37,7 @@ export $(grep -v '^#' .env | xargs)
 ./gradlew bootRun           # 백엔드 포트 8080
 
 # Windows PowerShell (권장)
-.\run.ps1
+.\scripts\full_stack_run.ps1
 
 # 프론트엔드 개발 서버 (선택)
 cd frontend && npm run dev  # 포트 5173, /api/* → 8080 프록시

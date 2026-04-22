@@ -1,5 +1,6 @@
 # .env에서 JAVA_HOME을 읽어 현재 세션에 적용한 뒤 bootRun 실행
-$envFile = Join-Path $PSScriptRoot ".env"
+$projectRoot = Join-Path $PSScriptRoot ".."
+$envFile = Join-Path $projectRoot ".env"
 if (Test-Path $envFile) {
     Get-Content $envFile | Where-Object { $_ -notmatch '^\s*#' -and $_ -match '=' } | ForEach-Object {
         $line = $_ -replace "`r", ""
@@ -13,4 +14,4 @@ if (Test-Path $envFile) {
 $env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
 Write-Host "JAVA_HOME = $env:JAVA_HOME"
 
-& "$PSScriptRoot\gradlew.bat" bootRun
+& "$projectRoot\gradlew.bat" bootRun

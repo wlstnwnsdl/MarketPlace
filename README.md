@@ -127,9 +127,9 @@ Get-Content .env | Where-Object { $_ -notmatch '^#' -and $_ -ne '' } | ForEach-O
 
 **Windows (PowerShell) — 권장:**
 ```powershell
-.\run.ps1
+.\scripts\full_stack_run.ps1
 ```
-> `run.ps1`이 `.env`를 읽어 `JAVA_HOME`을 자동 설정하고 `gradlew.bat bootRun`을 실행합니다.  
+> `full_stack_run.ps1`이 `.env`를 읽어 `JAVA_HOME`을 자동 설정하고 `gradlew.bat bootRun`을 실행합니다.  
 > PowerShell에서 `.\gradlew.bat bootRun`을 직접 실행하면 `JAVA_HOME`이 설정되지 않아 Java 8로 실행되며 빌드가 실패합니다.
 
 **macOS / Linux / Git Bash:**
@@ -164,7 +164,7 @@ export $(grep -v '^#' .env | xargs)
 
 Windows (PowerShell):
 ```powershell
-# run.ps1 내용을 수정하거나 아래처럼 직접 실행
+# scripts/full_stack_run.ps1 내용을 수정하거나 아래처럼 직접 실행
 $env:JAVA_HOME = (Get-Content .env | Select-String 'JAVA_HOME' | ForEach-Object { ($_ -split '=',2)[1].Trim() -replace "`r",'' })
 $env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
 .\gradlew.bat bootRun -x copyFrontend
@@ -344,8 +344,8 @@ Google Cloud Console에서 승인된 리디렉션 URI가 정확히 `http://local
 
 **Windows PowerShell에서 `Dependency requires at least JVM runtime version 17` 오류**
 
-`.\gradlew.bat bootRun` 대신 `.\run.ps1`을 사용하세요. `run.ps1`이 `.env`의 `JAVA_HOME`을 실행 전에 자동으로 설정합니다.
+`.\gradlew.bat bootRun` 대신 `.\scripts\full_stack_run.ps1`을 사용하세요. `full_stack_run.ps1`이 `.env`의 `JAVA_HOME`을 실행 전에 자동으로 설정합니다.
 
 **Windows에서 `./gradlew` 실행 안 됨**
 
-Git Bash를 사용하거나 PowerShell에서 `.\run.ps1`을 사용하세요.
+Git Bash를 사용하거나 PowerShell에서 `.\scripts\full_stack_run.ps1`을 사용하세요.

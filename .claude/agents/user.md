@@ -41,7 +41,7 @@ python scripts/live_test.py
 python scripts/live_test.py --no-wait
 
 # 서버 시작 (Windows PowerShell 별도 창)
-.\run.ps1
+.\scripts\full_stack_run.ps1
 ```
 
 ## 테스트 파일 갱신 규칙
