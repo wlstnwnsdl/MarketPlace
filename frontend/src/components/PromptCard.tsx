@@ -3,6 +3,7 @@ import type { PromptSummary, PromptType, TargetRole } from '../types'
 interface PromptCardProps {
   prompt: PromptSummary
   onClick: () => void
+  buttonLabel?: string
 }
 
 const TYPE_LABEL: Record<PromptType, string> = {
@@ -75,7 +76,7 @@ function TypeIcon({ type }: { type: PromptType }) {
   )
 }
 
-export default function PromptCard({ prompt, onClick }: PromptCardProps) {
+export default function PromptCard({ prompt, onClick, buttonLabel }: PromptCardProps) {
   const subLabel = [
     TYPE_LABEL[prompt.type],
     prompt.targetRole ? ROLE_LABEL[prompt.targetRole] : null,
@@ -104,7 +105,7 @@ export default function PromptCard({ prompt, onClick }: PromptCardProps) {
 
       <div className="border-t border-zinc-100 mt-4 pt-4">
         <button className="mp-btn-terminal w-full justify-center">
-          <span>&gt; marketplace get {prompt.id}</span>
+          <span>{buttonLabel ?? '상세보기'}</span>
         </button>
       </div>
     </div>

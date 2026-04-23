@@ -20,7 +20,7 @@
   }
 
   .mp-btn-terminal {
-    @apply bg-[#4D61E6] text-white text-xs font-mono px-4 py-2 rounded-lg
+    @apply bg-[#4D61E6] text-white text-sm px-4 py-2 rounded-lg
            hover:bg-[#3d50d4] transition-colors flex items-center gap-2;
   }
 

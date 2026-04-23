@@ -196,7 +196,7 @@ export default function PromptDetailPage() {
       <main className="max-w-7xl mx-auto px-6 py-6">
         {/* 뒤로가기 */}
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/')}
           className="flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-900 mb-6 transition-colors"
         >
           ← 목록으로
@@ -291,7 +291,7 @@ export default function PromptDetailPage() {
               {isOwner && (
                 <button
                   onClick={() => navigate(`/edit/${prompt.id}`)}
-                  className="w-full text-sm text-zinc-600 border border-zinc-200 rounded-lg px-4 py-2 hover:bg-zinc-50 transition-colors"
+                  className="w-full mt-3 text-sm text-zinc-600 border border-zinc-200 rounded-lg px-4 py-2 hover:bg-zinc-50 transition-colors"
                 >
                   수정하기
                 </button>

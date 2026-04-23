@@ -102,7 +102,7 @@ export default function MyPage() {
                 ))
               : myPrompts.map((p) => (
                   <div key={p.id} className="flex flex-col">
-                    <PromptCard prompt={p} onClick={() => navigate(`/prompts/${p.id}`)} />
+                    <PromptCard prompt={p} onClick={() => navigate(`/prompts/${p.id}`)} buttonLabel="상세보기" />
                     <div className="flex items-center justify-between mt-2 px-1">
                       <span className={
                         p.status === 'PUBLIC'

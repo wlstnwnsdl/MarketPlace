@@ -187,24 +187,18 @@ export default function UploadPage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label className={labelClass}>타입 *</label>
-                {isEdit ? (
-                  <span className="inline-block bg-zinc-100 text-zinc-600 text-xs px-3 py-1.5 rounded-full font-medium">
-                    {TYPE_OPTIONS.find((o) => o.value === type)?.label ?? type}
-                  </span>
-                ) : (
-                  <div className="flex flex-wrap gap-1">
-                    {TYPE_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onClick={() => setType(opt.value)}
-                        className={type === opt.value ? 'mp-tab-active text-xs px-2.5 py-1' : 'mp-tab-inactive text-xs px-2.5 py-1'}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                <div className="flex flex-wrap gap-1">
+                  {TYPE_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setType(opt.value)}
+                      className={type === opt.value ? 'mp-tab-active text-xs px-2.5 py-1' : 'mp-tab-inactive text-xs px-2.5 py-1'}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div>

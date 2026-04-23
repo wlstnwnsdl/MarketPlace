@@ -64,12 +64,25 @@ export default function Header() {
                   onClick={() => setShowProfile((v) => !v)}
                   className="w-8 h-8 rounded-full bg-[#4D61E6] flex items-center justify-center text-white text-xs font-semibold hover:opacity-80 transition-opacity"
                 >
-                  {user?.name?.[0]?.toUpperCase() ?? '?'}
+                  {(user?.name ?? user?.email ?? '?')[0].toUpperCase()}
                 </button>
                 {showProfile && (
                   <div className="absolute right-0 top-10 bg-white border border-zinc-200 rounded-xl shadow-lg p-4 z-50 min-w-[220px]">
-                    <p className="text-sm font-medium text-zinc-900 truncate">{user?.name ?? '사용자'}</p>
-                    <p className="text-xs text-zinc-500 mt-0.5 truncate">{user?.email ?? ''}</p>
+                    <p className="text-sm font-medium text-zinc-900 truncate">{user?.name ?? user?.email ?? ''}</p>
+                    {user?.name && (
+                      <p className="text-xs text-zinc-500 mt-0.5 truncate">{user?.email ?? ''}</p>
+                    )}
+                    <hr className="border-zinc-100 my-3" />
+                    <button
+                      onClick={() => {
+                        localStorage.removeItem('accessToken')
+                        localStorage.removeItem('refreshToken')
+                        window.location.href = '/'
+                      }}
+                      className="text-sm text-red-500 w-full text-left hover:text-red-600 transition-colors"
+                    >
+                      로그아웃
+                    </button>
                   </div>
                 )}
               </div>
