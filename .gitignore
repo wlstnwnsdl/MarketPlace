@@ -28,3 +28,6 @@ src/main/resources/static/
 # Report
 report/
 request.md
+
+# Claude
+.claude/settings.local.json
