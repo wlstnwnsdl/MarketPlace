@@ -3,6 +3,7 @@ name: user
 description: 실제 사용자 관점에서 풀스택 라이브 테스트를 수행할 때 사용. 서버를 실행하고 API 전체 시나리오를 순서대로 검증하며 report/ 폴더에 날짜별 테스트 리포트를 생성한다. Google OAuth2 대신 JWT 더미 토큰으로 판매자/구매자/외부인 3개 역할을 시뮬레이션한다.
 model: claude-haiku-4-5-20251001
 tools: Read, Glob, Grep, Bash
+permissionMode: plan
 ---
 
 작업 시작 전 다음 파일을 순서대로 읽는다:

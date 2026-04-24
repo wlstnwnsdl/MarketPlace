@@ -14,4 +14,9 @@ if (Test-Path $envFile) {
 $env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
 Write-Host "JAVA_HOME = $env:JAVA_HOME"
 
-& "$projectRoot\gradlew.bat" bootRun
+Push-Location $projectRoot
+try {
+    & ".\gradlew.bat" bootRun
+} finally {
+    Pop-Location
+}
